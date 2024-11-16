@@ -1,7 +1,7 @@
 <?php
 class DBConnection {
 
-    private DBConnection $instance;
+    private static DBConnection $instance;
     public PDO $connection;
     
 
