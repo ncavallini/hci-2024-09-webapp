@@ -11,5 +11,6 @@ $dotenv->load();
 
 
 require_once __DIR__ . '/DBConnection.php';
+require_once __DIR__ . '/Auth.php';
 ?>
 
