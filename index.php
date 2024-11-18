@@ -13,7 +13,7 @@
     <?php
     $path = __DIR__ . "/pages/$page.php";
     if(!file_exists($path)) {
-        print_error("Page not found");
+        print_alert("Page not found");
         goto footer;
     }
     

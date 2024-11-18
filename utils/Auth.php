@@ -4,19 +4,12 @@ class Auth {
 
 
     private static $allowedPages = ['home', 'login', 'signup'];
-    public static function create_user(string $username, string $email, string $password) {
-        $connection = DBConnection::get_connection();
-        $hash = password_hash($password, PASSWORD_BCRYPT);
-        $sql = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
-        $statement = $connection->prepare($sql);
-        return $statement->execute([$username, $email, $hash]);
-    }
 
     public static function login(string $username, string $password) : bool {
         $connection = DBConnection::get_connection();
-        $sql = "SELECT * FROM users WHERE username = ?";
+        $sql = "SELECT * FROM users WHERE username = :username_email OR email = :username_email";
         $statement = $connection->prepare($sql);
-        $statement->execute([$username]);
+        $statement->execute([':username_email' => $username]);
         $user = $statement->fetch();
         if (!$user) {
             return false;

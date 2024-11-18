@@ -16,3 +16,5 @@
     <br>
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
+<br>
+<p>Don't have an account? <a href="index.php?page=signup">Sign Up</a>!</p>
