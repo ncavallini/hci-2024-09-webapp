@@ -31,6 +31,12 @@
     <label for="estimated_load">Estimated load <span id="estimated_load_span">(5/10)</span></label>
     <input type="range" name="estimated_load" id="estimated_load" min="0" max="10" step="1" class="form-range">
     <br>
+   <label for="category">Category</label>
+   <select name="category" class="form-select">
+        <option value="STRESS">General Stress</option>
+        <option value="MENTAL">Mental Load</option>
+        <option value="PHYSICAL">Physical Load</option>
+   </select>
     <br>
     <button type="submit" class="btn btn-primary">Add</button>
 </form>

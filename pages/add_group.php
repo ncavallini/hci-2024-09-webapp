@@ -27,7 +27,7 @@
                     $users = $dbconnection->query("SELECT * FROM users");
                     foreach($users as $user){
                         echo "<tr>";
-                        echo "<td><input type='checkbox' x-user='" . $user['username'] . "'></td>";
+                        echo "<td><input type='checkbox' class='form-check-input' x-user='" . $user['username'] . "'></td>";
                         echo "<td>".$user['first_name'] . " " . $user['last_name'] ."</td>";
                         echo "<td>".$user['username']."</td>";
                         echo "</tr>";

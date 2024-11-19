@@ -1,6 +1,9 @@
 <?php
     require_once __DIR__ . "/utils/init.php";
     $dbconnection = DBConnection::get_connection();
+    if(Auth::is_logged_in()) {
+        $user = Auth::user();
+    }
 
     require_once __DIR__ . "/template/header.php";
 
@@ -8,6 +11,7 @@
     if(!Auth::is_allowed_page($page)) {
         $page = 'login';
     }
+ 
     ?>
     <main class="container" id="container">
     <?php

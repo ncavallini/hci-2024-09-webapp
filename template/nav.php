@@ -12,9 +12,19 @@
       </div>
       <div class="offcanvas-body">
         <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-        
+
+        <li class="nav-item">
+          <span class="badge rounded-pill bg-warning"><i class="fa fa-coins"></i> <?php echo $user['coins'] ?></span>
+          </li>
+
           <li class="nav-item">
             <a class="nav-link" href="index.php?page=dashboard">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.php?page=visualize">Visualize</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="index.php?page=manage">Manage</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -30,10 +40,6 @@
             </ul>
           </li>
         </ul>
-        <form class="d-flex mt-3" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
       </div>
     </div>
   </div>

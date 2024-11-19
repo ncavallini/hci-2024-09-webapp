@@ -22,14 +22,28 @@
             $tasks = $stmt->fetchAll();
 
             foreach( $tasks as $task ) {
+                
+
                 echo "<tr>";
                 echo "<td>" . $task['title'] . "</td>";
                 echo "<td>". (new DateTimeImmutable($task['due_date']))->format("d/m/Y, H:i") ."</td>";
-                echo "<td>" . ($task['is_completed'] == 1 ? "Yes" : "No") . "</td>";
-                echo "<td>". "ACTIONS" ."</td>";
+                echo "<td><input type='checkbox' class='form-check-input' " . ($task['is_completed'] ? "checked" : "") . " onclick=\"window.location.href='./actions/tasks/toggle_completed.php?task_id=" . $task['task_id'] . "'\"></td>";
+                echo "<td>". "<a href='index.php?page=edit_task&task_id=" . $task['task_id'] . "'><i class='fa fa-edit'></i></a>    <a href='./actions/tasks/delete.php?task_id=" . $task['task_id'] . "'><i class='fa fa-trash'/></a></td>";
                 echo "</tr>";
             }
             ?>
         </tbody>
     </table>
 </div>
+<br>
+<h2>Your Profile</h2>
+<br>
+<?php
+    $user = Auth::user();
+?>
+<ul class="list-group">
+  <li class="list-group-item"><i class="fa fa-user me-1"></i><?php echo $user['first_name'] . " " . $user['last_name'] ?></li>
+  <li class="list-group-item"><i class="fa fa-at me-1"></i><?php echo $user['email'] ?></li>
+  <li class="list-group-item"><i class="fa fa-key me-1"></i><code>******</code> <a class="link-with-icon" href="index.php?page=change_password">Change</a></li>
+  <li class="list-group-item bg-warning"><i class="fa fa-coins me-1"></i><?php echo $user['coins'] ?> coins</li>
+</ul>
