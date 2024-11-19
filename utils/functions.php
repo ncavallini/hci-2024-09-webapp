@@ -22,4 +22,8 @@
         if($timestamp == null) $timestamp = "now";
         return (new DateTimeImmutable($timestamp))->format("Y-m-dTH:i:s");
     } 
+
+    function redirect(string $url) {
+        echo "<script>window.location.href = '$url';</script>";
+    }
 ?>
