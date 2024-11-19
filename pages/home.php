@@ -7,4 +7,3 @@
         redirect('index.php?page=login');
     }
 ?>
-<h1 class="text-center">Hello, World</h1>
