@@ -13,7 +13,15 @@
     <select name="group" id="group_select" class="form-select">
         <option value="0">Personal</option>
         <?php
-            # FETCH GROUPS HERE
+            $sql = "SELECT m.group_id, g.name FROM membership m JOIN groups g USING(group_id) WHERE m.username = ?";
+            $stmt = $dbconnection->prepare($sql);
+            $stmt->execute([Auth::user()["username"]]);
+            $groups = $stmt->fetchAll();
+
+            foreach($groups as $group) {
+                echo "<option value='" . $group['group_id'] . "'>" . $group['name'] . "</option>";
+            }
+
         ?>
     </select>
     <br>

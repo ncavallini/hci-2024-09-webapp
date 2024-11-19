@@ -10,10 +10,11 @@ $isGroupTask = $_POST['group'] != 0;
 $group_id = $isGroupTask ? $_POST['group'] : null;
 
 if($isGroupTask) {
-    $sql = "INSERT INTO group_tasks (group_id, title, location, description, due_date, estimated_load, is_completed, created_at) 
-    VALUES (:group_id, :title, :location, :description, :due_date, :estimated_load, 0, NOW())";
+    $sql = "INSERT INTO group_tasks (group_id, user_id, title, location, description, due_date, estimated_load, is_completed, created_at) 
+    VALUES (:group_id, :user_id, :title, :location, :description, :due_date, :estimated_load, 0, NOW())";
     $stmt = $connection->prepare($sql);
     $stmt->bindParam(":group_id", $group_id);
+    $stmt->bindParam(":group_id", Auth::user()["user_id"]);
     $stmt->bindParam(":title", $_POST['title']);
     $stmt->bindParam(":location", $_POST['location']);
     $stmt->bindParam(":description", $_POST['description']);
@@ -23,9 +24,10 @@ if($isGroupTask) {
 
 }
 else {
-    $sql = "INSERT INTO tasks (title, location, description, due_date, estimated_load, is_completed, created_at) 
-    VALUES (:title, :location, :description, :due_date, :estimated_load, 0, NOW())";
+    $sql = "INSERT INTO tasks (user_id, title, location, description, due_date, estimated_load, is_completed, created_at) 
+    VALUES (:user_id, :title, :location, :description, :due_date, :estimated_load, 0, NOW())";
     $stmt = $connection->prepare($sql);
+    $stmt->bindParam(":user_id", Auth::user()["user_id"]);
     $stmt->bindParam(":title", $_POST['title']);
     $stmt->bindParam(":location", $_POST['location']);
     $stmt->bindParam(":description", $_POST['description']);
@@ -34,5 +36,6 @@ else {
     $stmt->execute();
 }
 
-header("Location: ../../index.php?page=dashboard");
+if($isGroupTask) header("Location: ../../index.php?page=group&id=$group_id");
+else header("Location: ../../index.php?page=manage_personal");
 ?>
