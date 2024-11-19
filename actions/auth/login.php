@@ -9,7 +9,7 @@
     $password = $_POST["password"];
 
     if(Auth::login($username, $password)) {
-        header("Location: /index.php?page=home");
+        header("Location: ../index.php?page=home");
     } else {
         print_alert("Invalid username or password", true);
     }

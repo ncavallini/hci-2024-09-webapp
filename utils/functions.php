@@ -12,4 +12,14 @@
             echo '</div>';
         }
     }
+
+    function datetime_as_mysql(int $timestamp = null) : string {
+        if($timestamp == null) $timestamp = "now";
+        return (new DateTimeImmutable($timestamp))->format("Y-m-d H:i:s");
+    } 
+
+    function datetime_as_html_input(int $timestamp = null) : string {
+        if($timestamp == null) $timestamp = "now";
+        return (new DateTimeImmutable($timestamp))->format("Y-m-dTH:i:s");
+    } 
 ?>

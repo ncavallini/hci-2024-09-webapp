@@ -11,3 +11,11 @@
 
 
 <body>
+<header class="container-fluid">
+ <!--   <h1 class="display-3 text-center">Visualizing Mental Load</h1>
+    <hr>
+    <br>
+-->
+<?php require_once __DIR__ . "/nav.php"; ?>
+</header>
+
