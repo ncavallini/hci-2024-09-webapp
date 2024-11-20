@@ -9,7 +9,7 @@ $connection = DBConnection::get_connection();
 $isGroupTask = isset($_GET['group_id']);
 
 if($isGroupTask) {
-    $sql = "DELETE FROM group_tasks WHERE task_id = ?";
+    $sql = "DELETE FROM group_tasks WHERE group_task_id = ?";
     $location = "../../index.php?page=group&group_id=" . $_GET['group_id'];   
 }
 else {

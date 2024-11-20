@@ -1,3 +1,6 @@
+<?php 
+$group_id = $_GET['group_id'] ?? 0;
+?>
 <h1 class="text-center">Add Task</h1>
 <form action="actions/tasks/add.php" method="POST">
     <label for="title">Title *</label>
@@ -19,7 +22,8 @@
             $groups = $stmt->fetchAll();
 
             foreach($groups as $group) {
-                echo "<option value='" . $group['group_id'] . "'>" . $group['name'] . "</option>";
+                $selected = $group['group_id'] == $group_id ? "selected" : "";
+                echo "<option $selected value='" . $group['group_id'] . "'>" . $group['name'] . "</option>";
             }
 
         ?>

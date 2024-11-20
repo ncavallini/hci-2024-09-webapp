@@ -46,9 +46,42 @@
 <br>
 <h2>Tasks</h2>
 <br>
+<a href="index.php?page=add_task&group_id=<?php echo $group_id ?>" class="btn btn-primary"><i class="fa fa-plus"></i></a>
+<p>&nbsp;</p>
+<div class="table-responsive">
+    <table class="table" id="personal-tasks">
+        <thead>
+            <tr>
+                <th>Done?</th>
+                <th>Task</th>
+                <th>Due</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            $sql = "SELECT * FROM group_tasks WHERE group_id = ? ORDER BY is_completed ASC, due_date ASC";
+            $stmt = $dbconnection->prepare($sql);
+            $stmt->execute([$group_id]);
+            $tasks = $stmt->fetchAll();
 
-<h2>Group Management</h2>
+            foreach( $tasks as $task ) {
+                $done_class = $task['is_completed'] ? "table-success" : "";
+                echo "<tr class='$done_class'>";
+                echo "<td><input type='checkbox' class='form-check-input' " . ($task['is_completed'] ? "checked" : "") . " onclick=\"window.location.href='./actions/tasks/toggle_completed.php?group_id=$group_id&task_id=" . $task['group_task_id'] . "'\"></td>";
+                echo "<td>" . $task['title'] . "</td>";
+                echo "<td>". (new DateTimeImmutable($task['due_date']))->format("d/m/Y, H:i") ."</td>";
+                echo "<td>". "<a href='index.php?page=edit_task&group_id=$group_id&task_id=" . $task['group_task_id'] . "'><i class='fa fa-edit'></i></a>    <a href='./actions/tasks/delete.php?group_id=$group_id&task_id=" . $task['group_task_id'] . "'><i class='fa fa-trash'/></a></td>";
+                echo "</tr>";
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
+<br>
+
+<h2>Management</h2>
 <div class="list-group" role="group" aria-label="Basic example">
-    <a href="index.php?page=edit_group&group_id=<?php echo $group_id ?>" class="list-group-item list-group-item-action">Edit Group</a>
-    <a href="actions/groups/delete.php?id=<?php echo $group_id ?>" class="list-group-item list-group-item-actio list-group-item-danger">Delete Group</a>
+    <a href="index.php?page=edit_group&group_id=<?php echo $group_id ?>" class="list-group-item list-group-item-action"> <i class="fa fa-edit"></i> Edit Group</a>
+    <a href="actions/groups/delete.php?id=<?php echo $group_id ?>" class="list-group-item list-group-item-actio list-group-item-danger"> <i class="fa fa-trash"></i> Delete Group</a>
 </div>
