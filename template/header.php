@@ -14,7 +14,9 @@
     <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.8/r-3.0.3/datatables.min.js"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/6.0.0/bootbox.min.js" integrity="sha512-oVbWSv2O4y1UzvExJMHaHcaib4wsBMS5tEP3/YkMP6GmkwRJAa79Jwsv+Y/w7w2Vb/98/Xhvck10LyJweB8Jsw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-</head>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-toaster@4.0.1/css/bootstrap-toaster.min.css" />
+    </head>
 
 
 <body>
