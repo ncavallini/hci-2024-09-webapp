@@ -91,10 +91,12 @@
         });
 
         if(usersToAdd.length == 0) {
-            alert("You must select at least one user to add to the group");
+            bootbox.alert({
+                title: 'Uh oh!',
+                message: "<div class='alert alert-danger'>You must select at least one member!</div>",
+            });
             return;
         }
-
         const form = document.getElementById("edit_group");
         const membersInput = document.createElement("input");
         membersInput.type = "hidden";

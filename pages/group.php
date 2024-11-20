@@ -81,7 +81,7 @@
 <br>
 
 <h2>Management</h2>
-<div class="list-group" role="group" aria-label="Basic example">
+<div class="list-group">
     <a href="index.php?page=edit_group&group_id=<?php echo $group_id ?>" class="list-group-item list-group-item-action"> <i class="fa fa-edit"></i> Edit Group</a>
-    <a href="actions/groups/delete.php?id=<?php echo $group_id ?>" class="list-group-item list-group-item-actio list-group-item-danger"> <i class="fa fa-trash"></i> Delete Group</a>
+    <a href="actions/groups/delete.php?id=<?php echo $group_id ?>" class="list-group-item list-group-item-action list-group-item-danger"> <i class="fa fa-trash"></i> Delete Group</a>
 </div>
