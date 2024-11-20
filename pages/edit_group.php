@@ -45,7 +45,7 @@
     <h2>Members</h2>
     <br>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table" id="members-table">
             <thead>
                 <tr>
                     <th>
@@ -104,4 +104,8 @@
         form.submit();
 
     }
+
+    $(document).ready(function() {
+        $('#members-table').DataTable();
+    })
 </script>
