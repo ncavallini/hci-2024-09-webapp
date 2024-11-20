@@ -36,5 +36,7 @@ class Auth {
     public static function is_allowed_page($page) {
         return in_array($page, self::$allowedPages) || self::is_logged_in();
     }
+    
+    
 }
 ?>
