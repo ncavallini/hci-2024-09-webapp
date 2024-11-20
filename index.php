@@ -7,7 +7,7 @@
 
     require_once __DIR__ . "/template/header.php";
 
-    $page = $_GET['page'] ?? 'home';
+    $page = $_GET['page'] ?? 'dashboard';
     if(!Auth::is_allowed_page($page)) {
         $page = 'login';
     }

@@ -11,7 +11,8 @@
                 <th>Done?</th>
                 <th>Task</th>
                 <th>Due</th>
-                <th>Actions</th>
+                <th>Edit</th>
+                <th>Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -27,7 +28,8 @@
                 echo "<td><input type='checkbox' class='form-check-input' " . ($task['is_completed'] ? "checked" : "") . " onclick=\"window.location.href='./actions/tasks/toggle_completed.php?task_id=" . $task['task_id'] . "'\"></td>";
                 echo "<td>" . $task['title'] . "</td>";
                 echo "<td>". (new DateTimeImmutable($task['due_date']))->format("d/m/Y, H:i") ."</td>";
-                echo "<td>". "<a href='index.php?page=edit_task&task_id=" . $task['task_id'] . "'><i class='fa fa-edit'></i></a>    <a href='./actions/tasks/delete.php?task_id=" . $task['task_id'] . "'><i class='fa fa-trash'/></a></td>";
+                echo "<td>". "<a class='btn btn-outline-primary' href='index.php?page=edit_task&task_id=" . $task['task_id'] . "'><i class='fa fa-edit'></i></a></td>";
+                echo "<td><a class='btn btn-outline-danger' href='./actions/tasks/delete.php?task_id=" . $task['task_id'] . "'><i class='fa fa-trash'/></a></td>";    
                 echo "</tr>";
             }
             ?>
