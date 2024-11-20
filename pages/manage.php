@@ -7,12 +7,13 @@
 
 <br>
 
-<h2>Groups</h2>
+<h2>Your Groups</h2>
 <a href="index.php?page=add_group" class="btn btn-primary"><i class="fa-solid fa-plus"></i></a>
 <?php
     $connection = DBConnection::get_connection();
-    $query = "SELECT group_id, name FROM groups";
-    $stmt = $connection->query($query);
+    $query = "SELECT m.group_id, g.name FROM membership m JOIN groups g ON m.group_id = g.group_id WHERE m.username = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->execute([$user['username']]);
     $groups = $stmt->fetchAll();
     if(count($groups) == 0) {
         echo "<p class='text-center'>There are no groups yet. Click + to create one.</p>";
