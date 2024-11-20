@@ -26,4 +26,32 @@
     function redirect(string $url) {
         echo "<script>window.location.href = '$url';</script>";
     }
+
+    function binary_search(array $arr, int|float|string $needle, bool $use_str_cmp = false): int {
+        if (count($arr) == 0) return -1; // Handle empty array case
+        
+        // Determine the comparison function
+        $cmp = $use_str_cmp 
+            ? function($a, $b) { return strcmp((string)$a, (string)$b); } 
+            : function($a, $b) { return $a <=> $b; };
+    
+        $low = 0;
+        $high = count($arr) - 1;
+    
+        while ($low <= $high) { // Correct condition
+            $mid = intdiv($low + $high, 2);
+            $res = $cmp($arr[$mid], $needle);
+    
+            if ($res == 0) {
+                return $mid; // Match found
+            } elseif ($res < 0) {
+                $low = $mid + 1; // Search in the right half
+            } else {
+                $high = $mid - 1; // Search in the left half
+            }
+        }
+    
+        return -1; // Not found
+    }
+    
 ?>

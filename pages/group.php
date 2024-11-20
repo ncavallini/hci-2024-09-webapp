@@ -49,6 +49,6 @@
 
 <h2>Group Management</h2>
 <div class="list-group" role="group" aria-label="Basic example">
-    <a href="index.php?page=edit_group&id=<?php echo $group_id ?>" class="list-group-item list-group-item-action">Edit Group</a>
+    <a href="index.php?page=edit_group&group_id=<?php echo $group_id ?>" class="list-group-item list-group-item-action">Edit Group</a>
     <a href="actions/groups/delete.php?id=<?php echo $group_id ?>" class="list-group-item list-group-item-actio list-group-item-danger">Delete Group</a>
 </div>
