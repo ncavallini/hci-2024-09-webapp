@@ -11,7 +11,8 @@
     if(Auth::login($username, $password)) {
         header("Location: ../../index.php?page=home");
     } else {
-        print_alert("Invalid username or password", true);
+        header("Location: ../../index.php?page=login&message=Wrong credentials.&message_style=danger");
+
     }
 ?>
 

@@ -2,7 +2,7 @@
 <p>&nbsp;&nbsp;</p>
 <footer class="container-fluid">
     <div class="card">
-    <h5 class="card-header"><?php if(Auth::is_logged_in()) echo "You are logged in as " . $_SESSION['user']['first_name'] . " " . $_SESSION['user']['last_name'] ?>    </h5>
+    <h5 class="card-header"><?php echo (Auth::is_logged_in()) ? "You are logged in as " . $_SESSION['user']['first_name'] . " " . $_SESSION['user']['last_name'] . "&nbsp; &nbsp; <a class='link-with-icon small'  href='actions/auth/logout.php'>Logout</a>" : "You are not logged in." ?>    </h5>
     <div class="card-body">
         <div id="clock" style="text-align: right;"></div>
     </div>

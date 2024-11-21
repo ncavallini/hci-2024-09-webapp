@@ -17,8 +17,7 @@
     <?php
     $path = __DIR__ . "/pages/$page.php";
     if(!file_exists($path)) {
-        print_alert("Page not found");
-        goto footer;
+        redirect("index.php?page=dashboard&message=Page not found&message_style=danger");
     }
     
     require_once $path;
@@ -40,7 +39,7 @@
         const style = urlSearchParam.get('message_style').toUpperCase() || "INFO";
         console.log(TOAST_STATUS[style]);
         const toast = {
-        title: "Ciao",
+        title: "",
         message: message,
         status: TOAST_STATUS.DANGER,
         timeout: 5000
