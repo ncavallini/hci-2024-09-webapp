@@ -46,8 +46,15 @@ if (!$group) {
     <div class="accordion-item">
         <h3 class="accordion-header">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#<?php echo $accordion_id; ?>">
-                <?php echo UserUtils::get_avatar($member['first_name'][0] . $member['last_name'][0]); ?>
+                <?php echo UserUtils::get_avatar($member['first_name'][0] . $member['last_name'][0]); ?> &nbsp;&nbsp;
                 &nbsp;&nbsp;<?php echo ($member['first_name'] . " " . $member['last_name']); ?>
+                <div class="inline-progress">
+                    &nbsp; &nbsp;
+        <div class="progress" style="width: 200px;">
+            <div class="progress-bar" role="progressbar" style="width: <?php echo UserUtils::get_total_load($member['username'])*100/UserUtils::get_max_load() ?>%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+    </div>
+
             </button>
         </h3>
         <div id="<?php echo $accordion_id; ?>" class="accordion-collapse collapse show">
@@ -59,17 +66,17 @@ if (!$group) {
                 <?php endif; ?>
 
                 <div class="table-responsive">
-                    <table class="table" id="personal-tasks">
+                    <table class="table" id="table-member-<?php echo $member['user_id'] ?>">
                         <thead>
                             <tr>
                                 <th>Done?</th>
                                 <th>Task</th>
                                 <th>Due</th>
-                                <th></th>
+                                <th data-dt-order="disable"><!-- Edit --></th>
                                 <?php if ($is_current_user): ?>
-                                <th></th>
+                                <th data-dt-order="disable"><!-- Transfer --></th>
                                 <?php endif; ?>
-                                <th></th>
+                                <th data-dt-order="disable"><!-- Delete --></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,7 +99,7 @@ if (!$group) {
                                            onclick="window.location.href='./actions/tasks/toggle_completed.php?group_id=<?php echo $group_id; ?>&task_id=<?php echo $task['group_task_id']; ?>'">
                                 </td>
                                 <td><?php echo ($task['title']); ?></td>
-                                <td><?php echo (new DateTimeImmutable($task['due_date']))->format("d/m/Y, H:i"); ?></td>
+                                <td><?php echo (new DateTimeImmutable($task['due_date']))->format("d/m/Y, H:i"); ?></td> 
                                 <td>
                                     <a class="btn btn-sm btn-outline-primary" 
                                        href="index.php?page=edit_task&group_id=<?php echo $group_id; ?>&task_id=<?php echo $task['group_task_id']; ?>">
@@ -165,4 +172,13 @@ if (!$group) {
     function setLinkIcon(allOpen, el) {
         el.innerHTML = allOpen ? "<i class='fa-solid fa-caret-up'></i> Collapse All" : "<i class='fa-solid fa-caret-down'></i> Expand All";
     }
+
+
+    $(document).ready(function() {
+       const tables = document.querySelectorAll("table");
+         tables.forEach(table => {
+            if(table.id.indexOf("table-member-") >= 0)
+              $(table).DataTable();
+         });
+    });
 </script>
