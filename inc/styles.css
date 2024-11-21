@@ -1,6 +1,7 @@
 html,
 body {
   height: 100%;
+  align-content: center;
 }
 body {
   display: flex;
