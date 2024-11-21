@@ -8,7 +8,7 @@
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .container {
+        .container { 
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
