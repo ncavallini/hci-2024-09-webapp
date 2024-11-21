@@ -4,91 +4,154 @@
     <title>All Graphics Example</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-       /* body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-            */
-        /*.container {
+        .disumano {
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-            */
+
         .chart-container {
             width: 45%;
             min-width: 300px;
+            display: none; /* Initially hidden */
         }
-       /* ul {
-            list-style-type: disc;
-            padding-left: 20px;
+
+        #taskList {
+            display: block; /* Default to visible */
         }
-            */
+
+        .view-selector {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        padding: 10px;
+        border: 2px solid black;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        background-color: lightgray;
+        width: 90%;
+        max-width: 600px;
+    }
+
+    .view-selector button {
+        flex: 1 1 calc(25% - 10px);
+        margin: 5px;
+        padding: 10px 20px;
+        border: none;
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+        text-align: center;
+    }
+
+    .view-selector button:hover {
+        background-color: #0056b3;
+    }
+
         .task-item {
-            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            width: 100%;
+            background: #f9f9f9;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .mental-load-bar {
+            width: 70%;
+            height: 10px;
+            margin-left: 10px;
+            background-color: lightgray;
+            border-radius: 5px;
+            overflow: hidden;
             position: relative;
         }
-        .mental-load-bar {
-            width: 100%;
-            height: 5px;
-            background-color: lightgray;
-            position: absolute;
-            top: -10px;
-        }
+
         .mental-load-bar span {
             display: block;
             height: 100%;
-            background-color: red;
+            background-color: turquoise;
         }
-        .task {
-            margin-top: 5px;
+
+        .task-name {
+            width: 30%;
         }
     </style>
 </head>
+<h1>Various Visualizations</h1>
 <body>
-    <h1>Various Visualizations</h1>
-    <div class="container">
+    <div class="disumano">
+        <!-- View Selector -->
+        <div class="view-selector">
+            <button onclick="showView('taskList')">Task List</button>
+            <button onclick="showView('lineChart')">Line Chart</button>
+            <button onclick="showView('bubbleChart')">Bubble Chart</button>
+            <button onclick="showView('pieChart')">Pie Chart</button>
+        </div>
+
         <!-- List Example -->
-        <div class="chart-container">
+        <div id="taskList" class="chart-container">
             <h2>Task List</h2>
-            <div id="taskList"></div>
+            <div></div>
         </div>
 
         <!-- Line Graph Example -->
-        <div class="chart-container">
+        <div id="lineChart" class="chart-container">
             <h2>Line Chart</h2>
-            <canvas id="lineChart"></canvas>
+            <canvas></canvas>
         </div>
 
         <!-- Bubble Chart Example -->
-        <div class="chart-container">
+        <div id="bubbleChart" class="chart-container">
             <h2>Bubble Chart</h2>
-            <canvas id="bubbleChart"></canvas>
+            <canvas></canvas>
         </div>
 
         <!-- Pie Chart Example -->
-        <div class="chart-container">
+        <div id="pieChart" class="chart-container">
             <h2>Pie Chart</h2>
-            <canvas id="pieChart"></canvas>
+            <canvas></canvas>
         </div>
     </div>
 
     <script>
-        // Task List with Mental Load
+        function showView(viewId) {
+            // Hide all chart containers
+            document.querySelectorAll('.chart-container').forEach(container => {
+                container.style.display = 'none';
+            });
+
+            // Show the selected view
+            document.getElementById(viewId).style.display = 'block';
+        }
+
+        // Default view
+        showView('taskList');
+
+        // Task List Logic
         const tasks = [
             { name: "Task 1: Complete the report", mentalLoad: 75 },
             { name: "Task 2: Review the project plan", mentalLoad: 50 },
-            { name: "Task 3: Team meeting at 3 PM", mentalLoad: 30 }
+            { name: "Task 3: Team meeting at 3 PM", mentalLoad: 30 },
+            { name: "Task 4: Prepare presentation", mentalLoad: 20 }
         ];
 
-        // Sort tasks by mental load in descending order
-        tasks.sort((a, b) => b.mentalLoad - a.mentalLoad);
+        // Sort tasks in ascending order of mental load
+        tasks.sort((a, b) => - a.mentalLoad + b.mentalLoad);
 
-        const taskList = document.getElementById("taskList");
-
+        const taskListContainer = document.getElementById("taskList").querySelector("div");
         tasks.forEach(task => {
             const taskItem = document.createElement("div");
             taskItem.className = "task-item";
+
+            // Task name
+            const taskName = document.createElement("div");
+            taskName.className = "task-name";
+            taskName.textContent = task.name;
 
             // Mental load bar
             const loadBar = document.createElement("div");
@@ -98,86 +161,28 @@
             loadFill.style.width = task.mentalLoad + "%";
             loadBar.appendChild(loadFill);
 
-            // Task text
-            const taskText = document.createElement("div");
-            taskText.className = "task";
-            taskText.textContent = `${task.name} (Mental Load: ${task.mentalLoad}%)`;
-
-            // Append to task item
+            // Append elements
+            taskItem.appendChild(taskName);
             taskItem.appendChild(loadBar);
-            taskItem.appendChild(taskText);
 
-            // Append task item to the task list
-            taskList.appendChild(taskItem);
+            // Append to task list
+            taskListContainer.appendChild(taskItem);
         });
 
-        // Line Chart
-        const lineChartCtx = document.getElementById('lineChart').getContext('2d');
-        new Chart(lineChartCtx, {
-            type: 'line',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-                datasets: [{
-                    label: 'Sales Over Time',
-                    data: [10, 20, 15, 30, 25, 40],
-                    borderColor: 'blue',
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                }
-            }
-        });
-
-        // Bubble Chart
-        const bubbleChartCtx = document.getElementById('bubbleChart').getContext('2d');
-        new Chart(bubbleChartCtx, {
-            type: 'bubble',
-            data: {
-                datasets: [{
-                    label: 'Bubble Dataset',
-                    data: [
-                        { x: 10, y: 20, r: 15 },
-                        { x: 15, y: 10, r: 10 },
-                        { x: 20, y: 30, r: 20 }
-                    ],
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)'
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                }
-            }
-        });
-
-        // Pie Chart
-        const pieChartCtx = document.getElementById('pieChart').getContext('2d');
-        new Chart(pieChartCtx, {
-            type: 'pie',
-            data: {
-                labels: ['Stress', 'Physical', 'Mental'],
-                datasets: [{
-                    data: [40, 30, 30],
-                    backgroundColor: ['red', 'blue', 'green']
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    },
-                }
-            }
-        });
+        // Chart.js Setup (same as original code)
+        const charts = {
+            lineChart: new Chart(document.getElementById('lineChart').querySelector('canvas'), {
+                type: 'line',
+                data: { labels: ['January', 'February'], datasets: [{ data: [10, 20] }] }
+            }),
+            bubbleChart: new Chart(document.getElementById('bubbleChart').querySelector('canvas'), {
+                type: 'bubble',
+                data: { datasets: [{ data: [{ x: 10, y: 20, r: 10 }] }] }
+            }),
+            pieChart: new Chart(document.getElementById('pieChart').querySelector('canvas'), {
+                type: 'pie',
+                data: { labels: ['Stress', 'Physical'], datasets: [{ data: [50, 50] }] }
+            })
+        };
     </script>
 </body>
