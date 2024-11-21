@@ -1,33 +1,34 @@
-html, body {
-    height: 100%;
-  }
-  body {
-    display: flex;
-    flex-direction: column;
-  }
-  .content {
-    flex: 1; /* Makes the content grow to fill available space */
-  }
+html,
+body {
+  height: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+}
+.content {
+  flex: 1; /* Makes the content grow to fill available space */
+}
 
 h1 {
-    text-align: center !important;
+  text-align: center !important;
 }
 
 th {
-    text-align: center !important;
+  text-align: center !important;
 }
 
 td {
-    text-align: center !important;
+  text-align: center !important;
 }
 
 a.link-with-icon {
-    text-decoration: none !important;
+  text-decoration: none !important;
 }
 
 a.link-with-icon::before {
-    font: var(--fa-font-solid);
-    content: " \f08e  ";
+  font: var(--fa-font-solid);
+  content: " \f08e  ";
 }
 
 .inline-progress {
