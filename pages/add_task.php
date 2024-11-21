@@ -29,6 +29,9 @@ $group_id = $_GET['group_id'] ?? 0;
         ?>
     </select>
     <br>
+    <label for="member">Member</label>
+    <input type="text" disabled class="form-control" value="<?php echo Auth::user()['first_name'] . " " . Auth::user()['last_name'] ?>">
+    <br>
     <label for="description">Description</label>
     <textarea name="description" class="form-control" rows="5"></textarea>
     <br>

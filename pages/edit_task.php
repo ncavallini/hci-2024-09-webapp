@@ -26,27 +26,9 @@ if(!$task) {
     <label for="location">Location</label>
     <input type="text" name="location" class="form-control" value="<?php echo $task['location'] ?>">
     <br>
-  <!-- <label for="group">Group</label>
-    <select name="group" id="group_select" class="form-select">
-        <option value="0">Personal</option>
--->
-        <?php 
-        /*
-            $sql = "SELECT m.group_id, g.name FROM membership m JOIN groups g USING(group_id) WHERE m.username = ?";
-            $stmt = $dbconnection->prepare($sql);
-            $stmt->execute([Auth::user()["username"]]);
-            $groups = $stmt->fetchAll();
-
-            foreach($groups as $group) {
-                $selected = $task['group_id'] == $group['group_id'] ? "selected" : "";
-                echo "<option $selected value='" . $group['group_id'] . "'>" . $group['name'] . "</option>";
-            }
-            
-*/
-     ?>
-    </select>
+    <label for="member">Member</label>
+    <input type="text" disabled class="form-control" value="<?php echo Auth::user()['first_name'] . " " . Auth::user()['last_name'] ?>">
     <br>
-    <?php # skip_group: ?>
     <label for="description">Description</label>
     <textarea name="description" class="form-control" rows="5"><?php echo $task['description'] ?></textarea>
     <br>
