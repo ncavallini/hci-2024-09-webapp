@@ -4,12 +4,12 @@ const AB_TEST_VERSION_B = "B";
 
 function initABTest() {
     if(window.localStorage.getItem(LOCAL_STORAGE_AB_KEY) === null) {
-        window.localStorage.setItem(LOCAL_STORAGE_KEY, AB_TEST_VERSION_A);
+        window.localStorage.setItem(LOCAL_STORAGE_AB_KEY, AB_TEST_VERSION_A);
     }
 }
 
 function getABTestVersion() {
-    return window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    return window.localStorage.getItem(LOCAL_STORAGE_AB_KEY);
 }
 
 initABTest();

@@ -4,23 +4,26 @@
     <title>All Graphics Example</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body {
+       /* body {
             font-family: Arial, sans-serif;
             margin: 20px;
         }
-        .container {
+            */
+        /*.container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
         }
+            */
         .chart-container {
             width: 45%;
             min-width: 300px;
         }
-        ul {
+       /* ul {
             list-style-type: disc;
             padding-left: 20px;
         }
+            */
         .task-item {
             margin-bottom: 20px;
             position: relative;
