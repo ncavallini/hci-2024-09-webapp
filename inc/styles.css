@@ -1,4 +1,23 @@
+html, body {
+    height: 100%;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  .content {
+    flex: 1; /* Makes the content grow to fill available space */
+  }
+
 h1 {
+    text-align: center !important;
+}
+
+th {
+    text-align: center !important;
+}
+
+td {
     text-align: center !important;
 }
 
@@ -9,4 +28,15 @@ a.link-with-icon {
 a.link-with-icon::before {
     font: var(--fa-font-solid);
     content: " \f08e  ";
+}
+
+.inline-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px; /* Adjust spacing between text and progress bar */
+}
+.progress {
+  flex-grow: 1; /* Optional: Allows the progress bar to resize nicely */
+  width: auto; /* Ensures it adjusts to the available space */
+  height: 10px; /* Adjust height of progress bar */
 }

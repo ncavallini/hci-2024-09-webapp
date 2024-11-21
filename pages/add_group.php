@@ -8,7 +8,7 @@
     <h2>Members</h2>
     <br>
     <div class="table-responsive">
-        <table class="table">
+        <table class="table" id="members-table">
             <thead>
                 <tr>
                     <th>
@@ -26,8 +26,9 @@
                 <?php
                     $users = $dbconnection->query("SELECT * FROM users");
                     foreach($users as $user){
+                        $force_current = $user['username'] == Auth::user()['username'] ? "checked disabled" : "";
                         echo "<tr>";
-                        echo "<td><input type='checkbox' class='form-check-input' x-user='" . $user['username'] . "'></td>";
+                        echo "<td><input type='checkbox' $force_current class='form-check-input' x-user='" . $user['username'] . "'></td>";
                         echo "<td>".$user['first_name'] . " " . $user['last_name'] ."</td>";
                         echo "<td>".$user['username']."</td>";
                         echo "</tr>";
@@ -60,4 +61,8 @@
         form.submit();
 
     }
+
+    $(document).ready(function() {
+        $('#members-table').DataTable();
+    });
 </script>

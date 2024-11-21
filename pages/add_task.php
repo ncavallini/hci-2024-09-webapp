@@ -1,3 +1,6 @@
+<?php 
+$group_id = $_GET['group_id'] ?? 0;
+?>
 <h1 class="text-center">Add Task</h1>
 <form action="actions/tasks/add.php" method="POST">
     <label for="title">Title *</label>
@@ -19,11 +22,15 @@
             $groups = $stmt->fetchAll();
 
             foreach($groups as $group) {
-                echo "<option value='" . $group['group_id'] . "'>" . $group['name'] . "</option>";
+                $selected = $group['group_id'] == $group_id ? "selected" : "";
+                echo "<option $selected value='" . $group['group_id'] . "'>" . $group['name'] . "</option>";
             }
 
         ?>
     </select>
+    <br>
+    <label for="member">Member</label>
+    <input type="text" disabled class="form-control" value="<?php echo Auth::user()['first_name'] . " " . Auth::user()['last_name'] ?>">
     <br>
     <label for="description">Description</label>
     <textarea name="description" class="form-control" rows="5"></textarea>

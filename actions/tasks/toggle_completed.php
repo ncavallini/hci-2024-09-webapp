@@ -15,7 +15,7 @@ if($group_id == 0) {
     $location = "../../index.php?page=manage_personal";
 }
 else {
-    $sql = "UPDATE group_tasks SET is_completed = NOT is_completed WHERE task_id = ?";
+    $sql = "UPDATE group_tasks SET is_completed = NOT is_completed WHERE group_task_id = ?";
     $location = "../../index.php?page=group&id=$group_id";
 
 }

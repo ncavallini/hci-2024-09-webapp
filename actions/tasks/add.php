@@ -14,7 +14,7 @@ if($isGroupTask) {
     VALUES (:group_id, :user_id, :title, :location, :description, :due_date, :estimated_load, :category, 0, NOW())";
     $stmt = $connection->prepare($sql);
     $stmt->bindParam(":group_id", $group_id);
-    $stmt->bindParam(":group_id", Auth::user()["user_id"]);
+    $stmt->bindParam(":user_id", Auth::user()["user_id"]);
     $stmt->bindParam(":title", $_POST['title']);
     $stmt->bindParam(":location", $_POST['location']);
     $stmt->bindParam(":description", $_POST['description']);
