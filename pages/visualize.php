@@ -64,62 +64,59 @@ if ($total_load > $max_load) {
 $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 ?>
 
-<!DOCTYPE html>
-<html>
-<body>
-    <div class="container mt-5">
-        <h1 class="mb-4">All Tasks</h1>
+<div class="container mt-5">
+    <h1 class="mb-4">All Tasks</h1>
 
-        <!-- Mental Load Bar -->
-        <div class="mb-4">
-            <h5>Your Mental Load</h5>
-            <div class="progress">
-                <div 
-                    class="progress-bar" 
-                    role="progressbar" 
-                    style="width: <?php echo $load_percentage; ?>%;" 
-                    aria-valuenow="<?php echo $total_load; ?>" 
-                    aria-valuemin="0" 
-                    aria-valuemax="<?php echo $max_load; ?>">
-                    <?php echo round($load_percentage); ?>%
-                </div>
+    <!-- Mental Load Bar -->
+    <div class="mb-4">
+        <h5>Your Mental Load</h5>
+        <div class="progress">
+            <div 
+                class="progress-bar" 
+                role="progressbar" 
+                style="width: <?php echo $load_percentage; ?>%;" 
+                aria-valuenow="<?php echo $total_load; ?>" 
+                aria-valuemin="0" 
+                aria-valuemax="<?php echo $max_load; ?>">
+                <?php echo round($load_percentage); ?>%
             </div>
-            <p class="mt-2">Current Load: <?php echo $total_load; ?> / Maximum Load: <?php echo $max_load; ?></p>
         </div>
-
-        <!-- Task Table -->
-        <?php if (!empty($tasks)): ?>
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Description</th>
-                        <th>Due Date</th>
-                        <th>Estimated Load</th>
-                        <th>Group</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($tasks as $task): ?>
-                        <tr data-bs-toggle="modal" data-bs-target="#taskDetailsModal"
-                            onclick="showTaskDetails('<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES, 'UTF-8'); ?>')">
-                            <td><?php echo htmlspecialchars($task['title']); ?></td>
-                            <td><?php echo htmlspecialchars($task['description']); ?></td>
-                            <td><?php echo (new DateTimeImmutable($task['due_date']))->format('d/m/Y, H:i'); ?></td>
-                            <td><?php echo htmlspecialchars($task['estimated_load']); ?></td>
-                            <td><?php echo htmlspecialchars($task['group_name']); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php else: ?>
-            <p class="lead">No tasks found for you across any groups.</p>
-        <?php endif; ?>
+        <p class="mt-2">Current Load: <?php echo $total_load; ?> / Maximum Load: <?php echo $max_load; ?></p>
     </div>
 
-    <!-- Modal -->
+    <!-- List View -->
+    <div id="listView" class="d-flex flex-column gap-3">
+        <!-- Task/Group Toggle Buttons -->
+        <div class="mb-3 text-center">
+            <button id="taskListButton" class="btn btn-primary" onclick="showListView('tasks')">Tasks</button>
+            <button id="groupListButton" class="btn btn-secondary" onclick="showListView('groups')">Groups</button>
+        </div>
+
+        <!-- Task Items Container -->
+        <div id="taskItems">
+            <?php if (!empty($tasks)): ?>
+                <?php foreach ($tasks as $task): ?>
+                    <div class="task-item d-flex justify-content-between align-items-center p-3 border rounded"
+                        onclick="showTaskDetails('<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES, 'UTF-8'); ?>')">
+                        <div class="task-info">
+                            <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
+                            <p class="mb-1 text-muted">Group: <?php echo htmlspecialchars($task['group_name']); ?></p>
+                            <small class="text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('F j, Y, g:i A'); ?></small>
+                        </div>
+                        <div class="task-load text-end">
+                            <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="lead text-center text-muted">No tasks found for you across any groups.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Modal for Task Details -->
     <div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="taskDetailsModalLabel">Task Details</h5>
@@ -139,7 +136,158 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         </div>
     </div>
 
-    <script>
+    <!-- Modal for Group Details -->
+    <div class="modal fade" id="groupDetailsModal" tabindex="-1" aria-labelledby="groupDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="groupDetailsModalLabel">Group Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h5 id="groupName"></h5>
+                    <ul id="groupTasksList" class="list-unstyled"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Pie Chart View -->
+    <div id="pieChartView" style="display: none;">
+        <div class="mb-3 text-center">
+            <button id="tasksPieButton" class="btn btn-primary" onclick="showPieChart('tasks')">Tasks</button>
+            <button id="groupsPieButton" class="btn btn-secondary" onclick="showPieChart('groups')">Groups</button>
+        </div>
+        <canvas id="pieChart" width="400" height="400"></canvas>
+    </div>
+
+    <!-- View Toggle Buttons -->
+    <div class="mt-4 text-center">
+        <button id="listViewButton" class="btn btn-primary" onclick="showView('listView')">List View</button>
+        <button id="pieChartViewButton" class="btn btn-secondary" onclick="showView('pieChartView')">Pie Chart View</button>
+    </div>
+</div>
+
+<script>
+    let pieChart; // Chart.js instance
+
+    function showView(viewId) {
+    // Get references to views and buttons
+    const listView = document.getElementById('listView');
+    const pieChartView = document.getElementById('pieChartView');
+    const listViewButton = document.getElementById('listViewButton');
+    const pieChartViewButton = document.getElementById('pieChartViewButton');
+
+    // Ensure all elements exist
+    if (!listView || !pieChartView || !listViewButton || !pieChartViewButton) {
+        console.error("Required elements not found!");
+        return;
+    }
+
+    // Reset both views
+    listView.classList.remove('visible', 'hidden');
+    pieChartView.classList.remove('visible', 'hidden');
+
+    // Show the selected view
+    if (viewId === 'listView') {
+        listView.classList.add('visible');
+        pieChartView.classList.add('hidden');
+    } else if (viewId === 'pieChartView') {
+        listView.classList.add('hidden');
+        pieChartView.classList.add('visible');
+        showPieChart('tasks'); // Render Pie Chart in Tasks mode
+    }
+
+    // Update button styles
+    listViewButton.classList.add(viewId === 'listView' ? 'btn-primary' : 'btn-secondary');
+    listViewButton.classList.remove(viewId === 'listView' ? 'btn-secondary' : 'btn-primary');
+
+    pieChartViewButton.classList.add(viewId === 'pieChartView' ? 'btn-primary' : 'btn-secondary');
+    pieChartViewButton.classList.remove(viewId === 'pieChartView' ? 'btn-secondary' : 'btn-primary');
+}
+
+
+
+
+function showListView(mode) {
+    const taskItemsContainer = document.getElementById('taskItems');
+    const tasks = <?php echo json_encode($tasks); ?>;
+
+    // Clear existing items
+    taskItemsContainer.innerHTML = '';
+
+    if (mode === 'tasks') {
+        // Display individual tasks
+        tasks.forEach(task => {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'task-item d-flex justify-content-between align-items-center p-3 border rounded';
+            taskDiv.onclick = () => showTaskDetails(JSON.stringify(task));
+            taskDiv.innerHTML = `
+                <div class="task-info">
+                    <h5 class="mb-1">${task.title}</h5>
+                    <p class="mb-1 text-muted">Group: ${task.group_name}</p>
+                    <small class="text-muted">Due: ${new Date(task.due_date).toLocaleString()}</small>
+                </div>
+                <div class="task-load text-end">
+                    <span class="badge bg-primary">Load: ${task.estimated_load}</span>
+                </div>
+            `;
+            taskItemsContainer.appendChild(taskDiv);
+        });
+    } else if (mode === 'groups') {
+        // Aggregate tasks by groups
+        const groupedTasks = tasks.reduce((acc, task) => {
+            acc[task.group_name] = acc[task.group_name] || [];
+            acc[task.group_name].push(task);
+            return acc;
+        }, {});
+
+        // Display group-based view
+        Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'group-item border rounded p-3 mb-3';
+            groupDiv.onclick = () => showGroupDetails(groupName, groupTasks);
+            groupDiv.innerHTML = `
+                <h5>${groupName}</h5>
+                <p>${groupTasks.length} tasks in this group</p>
+            `;
+            taskItemsContainer.appendChild(groupDiv);
+        });
+    }
+
+    // Update button styles for Task/Group toggle
+    document.getElementById('taskListButton').classList.toggle('btn-primary', mode === 'tasks');
+    document.getElementById('taskListButton').classList.toggle('btn-secondary', mode !== 'tasks');
+    document.getElementById('groupListButton').classList.toggle('btn-primary', mode === 'groups');
+    document.getElementById('groupListButton').classList.toggle('btn-secondary', mode !== 'groups');
+}
+
+function showGroupDetails(groupName, groupTasks) {
+    // Populate the modal with group details
+    document.getElementById('groupName').textContent = groupName;
+
+    const groupTasksList = document.getElementById('groupTasksList');
+    groupTasksList.innerHTML = ''; // Clear previous tasks
+
+    groupTasks.forEach(task => {
+        const taskItem = document.createElement('li');
+        taskItem.innerHTML = `
+            <strong>${task.title}</strong> (Load: ${task.estimated_load})<br>
+            Due: ${new Date(task.due_date).toLocaleString()}
+        `;
+        groupTasksList.appendChild(taskItem);
+    });
+
+    // Show the modal
+    new bootstrap.Modal(document.getElementById('groupDetailsModal')).show();
+}
+
+
+
     function showTaskDetails(taskJson) {
         const task = JSON.parse(taskJson);
         document.getElementById('taskTitle').textContent = task.title;
@@ -147,7 +295,84 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         document.getElementById('taskDueDate').textContent = new Date(task.due_date).toLocaleString();
         document.getElementById('taskEstimatedLoad').textContent = task.estimated_load;
         document.getElementById('taskGroupName').textContent = task.group_name;
+        new bootstrap.Modal(document.getElementById('taskDetailsModal')).show();
     }
-    </script>
-</body>
-</html>
+
+    function showPieChart(mode) {
+        const tasks = <?php echo json_encode($tasks); ?>;
+
+        // Prepare data based on mode
+        const data = mode === 'tasks'
+            ? tasks.map(task => ({ label: task.title, value: task.estimated_load }))
+            : Object.entries(tasks.reduce((acc, task) => {
+                acc[task.group_name] = (acc[task.group_name] || 0) + task.estimated_load;
+                return acc;
+            }, {})).map(([label, value]) => ({ label, value }));
+
+        // Update button styles for Tasks and Groups toggle
+        const tasksPieButton = document.getElementById('tasksPieButton');
+        const groupsPieButton = document.getElementById('groupsPieButton');
+
+        tasksPieButton.classList.add(mode === 'tasks' ? 'btn-primary' : 'btn-secondary');
+        tasksPieButton.classList.remove(mode === 'tasks' ? 'btn-secondary' : 'btn-primary');
+        groupsPieButton.classList.add(mode === 'groups' ? 'btn-primary' : 'btn-secondary');
+        groupsPieButton.classList.remove(mode === 'groups' ? 'btn-secondary' : 'btn-primary');
+
+        // Destroy the existing chart instance (if any) before creating a new one
+        if (pieChart) pieChart.destroy();
+
+        // Render the new pie chart
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: data.map(d => d.label),
+                datasets: [{
+                    data: data.map(d => d.value),
+                    backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6610f2']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => {
+                                const label = data[tooltipItem.dataIndex].label;
+                                const value = data[tooltipItem.dataIndex].value;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        showView('listView');
+        showListView('tasks');
+    });
+</script>
+
+<style>
+    .task-item:hover {
+        background-color: #e9ecef; /* Light grey hover */
+        cursor: pointer;
+    }
+    .group-item:hover {
+        background-color: #e9ecef;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+    .visible {
+        display: block !important;
+    }
+
+</style>
