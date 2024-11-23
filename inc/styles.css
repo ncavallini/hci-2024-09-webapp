@@ -42,3 +42,16 @@ a.link-with-icon::before {
   width: auto; /* Ensures it adjusts to the available space */
   height: 10px; /* Adjust height of progress bar */
 }
+
+.custom-button {
+  background-color: #f8f9fa; /* Light grey background */
+  color: #000; /* Black text */
+  border: 1px solid #ccc; /* Light border */
+  transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.custom-button:hover {
+  background-color: #6c757d; /* Dark grey on hover */
+  color: #fff; /* White text on hover */
+  border-color: #6c757d; /* Match border color on hover */
+}
