@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__ . "/../utils/init.php";
 
 // Ensure the user is logged in
 if (!Auth::is_logged_in()) {
@@ -20,25 +19,11 @@ try {
 $user_id = Auth::user()['user_id'];
 
 // Fetch all tasks for the current user across all groups
-$sql = "
-    SELECT 
-        gt.title, 
-        gt.description, 
-        gt.due_date, 
-        gt.estimated_load, 
-        g.name AS group_name 
-    FROM 
-        group_tasks gt
-    JOIN 
-        groups g ON gt.group_id = g.group_id
-    WHERE 
-        gt.user_id = ?
-    ORDER BY 
-        gt.estimated_load DESC, 
-        gt.due_date ASC";
+$sql = "SELECT * FROM tasks WHERE user_id = ? AND is_completed = 0 ORDER BY is_completed ASC, due_date ASC";
 $stmt = $dbconnection->prepare($sql);
 $stmt->execute([$user_id]);
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 // Calculate the total mental load
 $total_load = array_sum(array_column($tasks, 'estimated_load'));
@@ -63,6 +48,64 @@ if ($total_load > $max_load) {
 // Calculate the percentage of the current load relative to the maximum
 $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 ?>
+
+<?php
+
+// Ensure the user is logged in
+if (!Auth::is_logged_in()) {
+    header("Location: ../../index.php?page=login");
+    die;
+}
+
+try {
+    $user_id = Auth::user()['user_id'];
+    $dbconnection = DBConnection::get_connection();
+
+    // Fetch all tasks for the current user across all groups
+    $sql = "
+        SELECT 
+            gt.title, 
+            gt.description, 
+            gt.due_date, 
+            gt.estimated_load, 
+            g.name AS group_name 
+        FROM 
+            group_tasks gt
+        JOIN 
+            groups g ON gt.group_id = g.group_id
+        WHERE 
+            gt.user_id = ?
+        ORDER BY 
+            gt.estimated_load DESC, 
+            gt.due_date ASC";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Aggregate estimated loads by group
+    $sql = "
+        SELECT 
+            g.name AS group_name,
+            SUM(gt.estimated_load) AS total_load
+        FROM 
+            group_tasks gt
+        JOIN 
+            groups g ON gt.group_id = g.group_id
+        WHERE 
+            gt.user_id = ?
+        GROUP BY 
+            g.group_id";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $groupLoads = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+} catch (Exception $e) {
+    $tasks = [];
+    $groupLoads = [];
+    $error = $e->getMessage();
+}
+?>
+
 
 <div class="container mt-5">
     <h1 class="mb-4">All Tasks</h1>
@@ -216,7 +259,9 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 function showListView(mode) {
     const taskItemsContainer = document.getElementById('taskItems');
     const tasks = <?php echo json_encode($tasks); ?>;
+    const groupLoads = <?php echo json_encode($groupLoads); ?>;
 
+    console.log(tasks);
     // Clear existing items
     taskItemsContainer.innerHTML = '';
 
