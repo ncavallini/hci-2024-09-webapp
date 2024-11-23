@@ -3,8 +3,8 @@
    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <button class="navbar-toggler" onclick="javascript:window.history.go(-1)"><i class="fa-solid fa-arrow-left"></i></button>
     <a class="navbar-toggler" href="index.php?page=dashboard"><i class="fa-solid fa-house"></i></a>
+    <button class="navbar-toggler" onclick="javascript:window.history.go(-1)"><i class="fa-solid fa-arrow-left"></i></button>
     <!--<a class="navbar-brand" href="#">Visualizing Mental Load</a>-->
     
     <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
