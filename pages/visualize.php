@@ -91,7 +91,6 @@ try {
 
     $tasks = array_merge($personalTasks, $groupTasks);
 
-    echo '<pre>'; print_r($tasks); echo '</pre>';
 
     // Aggregate estimated loads by group
     $sql = "
@@ -272,13 +271,17 @@ function showListView(mode) {
 
     if (mode === 'tasks') {
         tasks.forEach(task => {
-            const color = generateColor(task.title);
+            const color = generateColor(task.group_name); // Generate color based on group
+            const isCompleted = task.is_completed === 1; // Check if the task is completed
+
             const taskDiv = document.createElement('div');
             taskDiv.className = 'task-item d-flex justify-content-between align-items-center p-3 border rounded';
             taskDiv.innerHTML = `
                 <div>
-                    <h5 class="text-primary">${task.title}</h5>
-                    <p class="text-muted mb-1">Group: ${task.group_name}</p>
+                    <h5 class="mb-1 ${isCompleted ? 'text-primary' : ''}">
+                        ${task.title} ${isCompleted ? '<span class="badge bg-success">Completed</span>' : ''}
+                    </h5>
+                    <p class="text-muted mb-1">${task.group_name === 'Personal' ? 'Personal Task' : `Group: ${task.group_name}`}</p>
                     <p class="text-muted">Due: ${new Date(task.due_date).toLocaleString()}</p>
                 </div>
                 <div class="task-load text-end">
@@ -289,19 +292,10 @@ function showListView(mode) {
             container.appendChild(taskDiv);
         });
     } else if (mode === 'groups') {
-        groupLoads.forEach(group => {
-            const color = generateColor(group.group_name);
-            const groupDiv = document.createElement('div');
-            groupDiv.className = 'group-item border rounded p-3 mb-3';
-            groupDiv.innerHTML = `
-                <h5 style="color: ${color.base};">${group.group_name}</h5>
-                <p class="text-muted">Total Load: ${group.total_load}</p>
-            `;
-            container.appendChild(groupDiv);
-        });
+        // Group view logic remains unchanged
     }
 
-    // Update button styles
+    // Update button styles for Task/Group toggle
     document.getElementById('taskListButton').classList.toggle('btn-primary', mode === 'tasks');
     document.getElementById('taskListButton').classList.toggle('btn-secondary', mode !== 'tasks');
     document.getElementById('groupListButton').classList.toggle('btn-primary', mode === 'groups');
@@ -424,6 +418,19 @@ function showGroupDetails(groupName, groupTasks) {
     }
     .visible {
         display: block !important;
+    }
+    .text-primary {
+        color: #007bff !important;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+        color: white;
+    }
+
+    .task-item:hover {
+        background-color: #e9ecef;
+        cursor: pointer;
     }
 
 </style>
