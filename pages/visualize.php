@@ -61,26 +61,37 @@ try {
     $user_id = Auth::user()['user_id'];
     $dbconnection = DBConnection::get_connection();
 
-    // Fetch all tasks for the current user across all groups
-    $sql = "
-        SELECT 
-            gt.title, 
-            gt.description, 
-            gt.due_date, 
-            gt.estimated_load, 
-            g.name AS group_name 
-        FROM 
-            group_tasks gt
-        JOIN 
-            groups g ON gt.group_id = g.group_id
-        WHERE 
-            gt.user_id = ?
-        ORDER BY 
-            gt.estimated_load DESC, 
-            gt.due_date ASC";
+    
+    $sql = "SELECT title, description, due_date, estimated_load, 'Personal' AS group_name 
+            FROM tasks 
+            WHERE user_id = ? AND is_completed = 0 
+            ORDER BY estimated_load DESC, due_date ASC";
     $stmt = $dbconnection->prepare($sql);
     $stmt->execute([$user_id]);
-    $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $personalTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $sql = "SELECT 
+                gt.title, 
+                gt.description, 
+                gt.due_date, 
+                gt.estimated_load, 
+                g.name AS group_name 
+            FROM 
+                group_tasks gt
+            JOIN 
+                groups g ON gt.group_id = g.group_id
+            WHERE 
+                gt.user_id = ?
+            ORDER BY 
+                gt.estimated_load DESC, 
+                gt.due_date ASC";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $groupTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $tasks = array_merge($personalTasks, $groupTasks);
+
+    echo '<pre>'; print_r($tasks); echo '</pre>';
 
     // Aggregate estimated loads by group
     $sql = "
@@ -255,61 +266,48 @@ try {
 
 
 
-
 function showListView(mode) {
-    const taskItemsContainer = document.getElementById('taskItems');
-    const tasks = <?php echo json_encode($tasks); ?>;
-    const groupLoads = <?php echo json_encode($groupLoads); ?>;
-
-    console.log(tasks);
-    // Clear existing items
-    taskItemsContainer.innerHTML = '';
+    const container = document.getElementById('taskItems');
+    container.innerHTML = ''; // Clear existing content
 
     if (mode === 'tasks') {
-        // Display individual tasks
         tasks.forEach(task => {
+            const color = generateColor(task.title);
             const taskDiv = document.createElement('div');
             taskDiv.className = 'task-item d-flex justify-content-between align-items-center p-3 border rounded';
-            taskDiv.onclick = () => showTaskDetails(JSON.stringify(task));
             taskDiv.innerHTML = `
-                <div class="task-info">
-                    <h5 class="mb-1">${task.title}</h5>
-                    <p class="mb-1 text-muted">Group: ${task.group_name}</p>
-                    <small class="text-muted">Due: ${new Date(task.due_date).toLocaleString()}</small>
+                <div>
+                    <h5 class="text-primary">${task.title}</h5>
+                    <p class="text-muted mb-1">Group: ${task.group_name}</p>
+                    <p class="text-muted">Due: ${new Date(task.due_date).toLocaleString()}</p>
                 </div>
                 <div class="task-load text-end">
-                    <span class="badge bg-primary">Load: ${task.estimated_load}</span>
+                    <span class="badge" style="background-color: ${color.base};">Load: ${task.estimated_load}</span>
                 </div>
             `;
-            taskItemsContainer.appendChild(taskDiv);
+            taskDiv.onclick = () => showTaskDetails(JSON.stringify(task));
+            container.appendChild(taskDiv);
         });
     } else if (mode === 'groups') {
-        // Aggregate tasks by groups
-        const groupedTasks = tasks.reduce((acc, task) => {
-            acc[task.group_name] = acc[task.group_name] || [];
-            acc[task.group_name].push(task);
-            return acc;
-        }, {});
-
-        // Display group-based view
-        Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
+        groupLoads.forEach(group => {
+            const color = generateColor(group.group_name);
             const groupDiv = document.createElement('div');
             groupDiv.className = 'group-item border rounded p-3 mb-3';
-            groupDiv.onclick = () => showGroupDetails(groupName, groupTasks);
             groupDiv.innerHTML = `
-                <h5>${groupName}</h5>
-                <p>${groupTasks.length} tasks in this group</p>
+                <h5 style="color: ${color.base};">${group.group_name}</h5>
+                <p class="text-muted">Total Load: ${group.total_load}</p>
             `;
-            taskItemsContainer.appendChild(groupDiv);
+            container.appendChild(groupDiv);
         });
     }
 
-    // Update button styles for Task/Group toggle
+    // Update button styles
     document.getElementById('taskListButton').classList.toggle('btn-primary', mode === 'tasks');
     document.getElementById('taskListButton').classList.toggle('btn-secondary', mode !== 'tasks');
     document.getElementById('groupListButton').classList.toggle('btn-primary', mode === 'groups');
     document.getElementById('groupListButton').classList.toggle('btn-secondary', mode !== 'groups');
 }
+
 
 function showGroupDetails(groupName, groupTasks) {
     // Populate the modal with group details
@@ -331,15 +329,24 @@ function showGroupDetails(groupName, groupTasks) {
     new bootstrap.Modal(document.getElementById('groupDetailsModal')).show();
 }
 
+    function generateColor(identifier) {
+        const hash = Array.from(identifier)
+            .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        const r = (hash * 53) % 255;
+        const g = (hash * 101) % 255;
+        const b = (hash * 197) % 255;
+        return { base: `rgba(${r}, ${g}, ${b}, 1)`, light: `rgba(${r}, ${g}, ${b}, 0.7)` };
+    }
 
 
     function showTaskDetails(taskJson) {
         const task = JSON.parse(taskJson);
         document.getElementById('taskTitle').textContent = task.title;
-        document.getElementById('taskDescription').textContent = task.description;
+        document.getElementById('taskDescription').textContent = task.description || 'No description provided';
         document.getElementById('taskDueDate').textContent = new Date(task.due_date).toLocaleString();
         document.getElementById('taskEstimatedLoad').textContent = task.estimated_load;
         document.getElementById('taskGroupName').textContent = task.group_name;
+
         new bootstrap.Modal(document.getElementById('taskDetailsModal')).show();
     }
 
@@ -399,9 +406,8 @@ function showGroupDetails(groupName, groupTasks) {
 
 
     document.addEventListener('DOMContentLoaded', () => {
-        showView('listView');
-        showListView('tasks');
-    });
+    showView('listView');
+    showListView('tasks');
 </script>
 
 <style>
