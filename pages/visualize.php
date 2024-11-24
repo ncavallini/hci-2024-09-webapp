@@ -64,6 +64,77 @@ if ($total_load > $max_load) {
 $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 ?>
 
+<?php
+require_once __DIR__ . "/../utils/init.php";
+
+if (!Auth::is_logged_in()) {
+    header("Location: ../../index.php?page=login");
+    die;
+}
+
+try {
+    $user_id = Auth::user()['user_id'];
+    $dbconnection = DBConnection::get_connection();
+
+    // Fetch personal tasks
+    $sql = "SELECT title, description, due_date, estimated_load, 'Personal' AS group_name, is_completed 
+            FROM tasks 
+            WHERE user_id = ? 
+            ORDER BY is_completed ASC, estimated_load DESC, due_date ASC";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $personalTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Fetch group tasks
+    $sql = "SELECT 
+                gt.title, 
+                gt.description, 
+                gt.due_date, 
+                gt.estimated_load, 
+                g.name AS group_name, 
+                gt.is_completed 
+            FROM 
+                group_tasks gt
+            JOIN 
+                groups g ON gt.group_id = g.group_id
+            WHERE 
+                gt.user_id = ?
+            ORDER BY 
+                gt.is_completed ASC, gt.estimated_load DESC, gt.due_date ASC";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $groupTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Merge tasks
+    $tasks = array_merge($personalTasks, $groupTasks);
+
+    // Calculate total mental load
+    $total_load = array_sum(array_column($tasks, 'estimated_load'));
+
+    // Fetch and update maximum load
+    $sql = "SELECT max_load FROM users WHERE user_id = ?";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $max_load = $row['max_load'] ?? 0;
+    if ($total_load > $max_load) {
+        $max_load = $total_load;
+        $sql = "UPDATE users SET max_load = ? WHERE user_id = ?";
+        $stmt = $dbconnection->prepare($sql);
+        $stmt->execute([$max_load, $user_id]);
+    }
+
+    $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
+
+} catch (Exception $e) {
+    $tasks = [];
+    $error = $e->getMessage();
+}
+?>
+
+
+
 <div class="container mt-5">
     <h1 class="mb-4">All Tasks</h1>
 
@@ -226,45 +297,43 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 
 
     function showListView(mode) {
-        currentMode = mode; // Remember the current mode
-        const taskItemsContainer = document.getElementById("taskItems");
+        const container = document.getElementById("taskItems");
+        container.innerHTML = "";
+
         const tasks = <?php echo json_encode($tasks); ?>;
 
-        // Clear existing items
-        taskItemsContainer.innerHTML = "";
-
         if (mode === "tasks") {
-            // Display individual tasks
             tasks.forEach(task => {
+                const isCompleted = task.is_completed === 1;
+                const dueDate = new Date(task.due_date);
+                const now = new Date();
+                const isOverdue = dueDate < now && !isCompleted;
+
                 const taskDiv = document.createElement("div");
                 taskDiv.className = "task-item d-flex justify-content-between align-items-center p-3 border rounded";
+                taskDiv.style.backgroundColor = isOverdue ? "lightcoral" : "";
                 taskDiv.onclick = () => showTaskDetails(JSON.stringify(task));
                 taskDiv.innerHTML = `
                     <div class="task-info">
-                        <h5 class="mb-1">${task.title}</h5>
-                        <p class="mb-1 text-muted">Group: ${task.group_name}</p>
-                        <small class="text-muted">
-                            Due: ${new Date(task.due_date).toLocaleString()}
-                        </small>
+                        <h5 class="${isCompleted ? 'text-primary' : ''} mb-1">
+                            ${task.title} ${isCompleted ? '<span class="badge bg-success">Completed</span>' : ''}
+                        </h5>
+                        <p class="mb-1 text-muted">${task.group_name === 'Personal' ? 'Personal Task' : `Group: ${task.group_name}`}</p>
+                        <small class="text-muted">Due: ${dueDate.toLocaleString()}</small>
                     </div>
                     <div class="task-load text-end">
                         <span class="badge bg-primary">Load: ${task.estimated_load}</span>
                     </div>
                 `;
-                taskItemsContainer.appendChild(taskDiv);
+                container.appendChild(taskDiv);
             });
-
-            // Highlight overdue tasks
-            highlightOverdueTasks();
         } else if (mode === "groups") {
-            // Aggregate tasks by groups
             const groupedTasks = tasks.reduce((acc, task) => {
                 acc[task.group_name] = acc[task.group_name] || [];
                 acc[task.group_name].push(task);
                 return acc;
             }, {});
 
-            // Display group-based view
             Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
                 const groupDiv = document.createElement("div");
                 groupDiv.className = "group-item border rounded p-3 mb-3";
@@ -273,16 +342,17 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
                     <h5>${groupName}</h5>
                     <p>${groupTasks.length} tasks in this group</p>
                 `;
-                taskItemsContainer.appendChild(groupDiv);
+                container.appendChild(groupDiv);
             });
-        }
-
-        // Update button styles for Task/Group toggle
-        document.getElementById("taskListButton").classList.toggle("btn-primary", mode === "tasks");
-        document.getElementById("taskListButton").classList.toggle("btn-secondary", mode !== "tasks");
-        document.getElementById("groupListButton").classList.toggle("btn-primary", mode === "groups");
-        document.getElementById("groupListButton").classList.toggle("btn-secondary", mode !== "groups");
     }
+
+    document.getElementById("taskListButton").classList.toggle("btn-primary", mode === "tasks");
+    document.getElementById("taskListButton").classList.toggle("btn-secondary", mode !== "tasks");
+    document.getElementById("groupListButton").classList.toggle("btn-primary", mode === "groups");
+    document.getElementById("groupListButton").classList.toggle("btn-secondary", mode !== "groups");
+}
+
+
 
 
 
@@ -291,7 +361,7 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         document.getElementById('groupName').textContent = groupName;
 
         const groupTasksList = document.getElementById('groupTasksList');
-        groupTasksList.innerHTML = ''; // Clear previous tasks
+        groupTasksList.innerHTML = '';
 
         // Add tasks to the group list
         groupTasks.forEach(task => {
@@ -481,4 +551,17 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         display: block !important;
     }
 
+    .text-primary {
+        color: #007bff !important;
+    }
+
+    .bg-success {
+        background-color: #28a745 !important;
+        color: white;
+    }
+
+    .task-item:hover {
+        background-color: #e9ecef;
+        cursor: pointer;
+    }
 </style>
