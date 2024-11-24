@@ -73,6 +73,7 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         <div class="progress">
             <div 
                 class="progress-bar" 
+                id="loadProgressBar" 
                 role="progressbar" 
                 style="width: <?php echo $load_percentage; ?>%;" 
                 aria-valuenow="<?php echo $total_load; ?>" 
@@ -81,6 +82,7 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
                 <?php echo round($load_percentage); ?>%
             </div>
         </div>
+
         <p class="mt-2">Current Load: <?php echo $total_load; ?> / Maximum Load: <?php echo $max_load; ?></p>
     </div>
 
@@ -110,7 +112,7 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
                         <div class="task-info">
                             <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
                             <p class="mb-1 text-muted">Group: <?php echo htmlspecialchars($task['group_name']); ?></p>
-                            <small class="text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('F j, Y, g:i A'); ?></small>
+                            <small class="text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></small>
                         </div>
                         <div class="task-load text-end">
                             <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
@@ -199,7 +201,7 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         // Reset both views
         listView.classList.remove('visible', 'hidden');
         pieChartView.classList.remove('visible', 'hidden');
-        
+
         // Update button styles
         listViewButton.classList.add(viewId === 'listView' ? 'btn-primary' : 'btn-secondary');
         listViewButton.classList.remove(viewId === 'listView' ? 'btn-secondary' : 'btn-primary');
@@ -225,24 +227,25 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 
     function showListView(mode) {
         currentMode = mode; // Remember the current mode
-        const taskItemsContainer = document.getElementById('taskItems');
+        const taskItemsContainer = document.getElementById("taskItems");
         const tasks = <?php echo json_encode($tasks); ?>;
 
         // Clear existing items
-        taskItemsContainer.innerHTML = '';
+        taskItemsContainer.innerHTML = "";
 
-
-        if (mode === 'tasks') {
+        if (mode === "tasks") {
             // Display individual tasks
             tasks.forEach(task => {
-                const taskDiv = document.createElement('div');
-                taskDiv.className = 'task-item d-flex justify-content-between align-items-center p-3 border rounded';
+                const taskDiv = document.createElement("div");
+                taskDiv.className = "task-item d-flex justify-content-between align-items-center p-3 border rounded";
                 taskDiv.onclick = () => showTaskDetails(JSON.stringify(task));
                 taskDiv.innerHTML = `
                     <div class="task-info">
                         <h5 class="mb-1">${task.title}</h5>
                         <p class="mb-1 text-muted">Group: ${task.group_name}</p>
-                        <small class="text-muted">Due: ${new Date(task.due_date).toLocaleString()}</small>
+                        <small class="text-muted">
+                            Due: ${new Date(task.due_date).toLocaleString()}
+                        </small>
                     </div>
                     <div class="task-load text-end">
                         <span class="badge bg-primary">Load: ${task.estimated_load}</span>
@@ -250,7 +253,10 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
                 `;
                 taskItemsContainer.appendChild(taskDiv);
             });
-        } else if (mode === 'groups') {
+
+            // Highlight overdue tasks
+            highlightOverdueTasks();
+        } else if (mode === "groups") {
             // Aggregate tasks by groups
             const groupedTasks = tasks.reduce((acc, task) => {
                 acc[task.group_name] = acc[task.group_name] || [];
@@ -260,8 +266,8 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 
             // Display group-based view
             Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
-                const groupDiv = document.createElement('div');
-                groupDiv.className = 'group-item border rounded p-3 mb-3';
+                const groupDiv = document.createElement("div");
+                groupDiv.className = "group-item border rounded p-3 mb-3";
                 groupDiv.onclick = () => showGroupDetails(groupName, groupTasks);
                 groupDiv.innerHTML = `
                     <h5>${groupName}</h5>
@@ -271,13 +277,13 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
             });
         }
 
-
         // Update button styles for Task/Group toggle
-        document.getElementById('taskListButton').classList.toggle('btn-primary', mode === 'tasks');
-        document.getElementById('taskListButton').classList.toggle('btn-secondary', mode !== 'tasks');
-        document.getElementById('groupListButton').classList.toggle('btn-primary', mode === 'groups');
-        document.getElementById('groupListButton').classList.toggle('btn-secondary', mode !== 'groups');
+        document.getElementById("taskListButton").classList.toggle("btn-primary", mode === "tasks");
+        document.getElementById("taskListButton").classList.toggle("btn-secondary", mode !== "tasks");
+        document.getElementById("groupListButton").classList.toggle("btn-primary", mode === "groups");
+        document.getElementById("groupListButton").classList.toggle("btn-secondary", mode !== "groups");
     }
+
 
 
     function showGroupDetails(groupName, groupTasks) {
@@ -364,7 +370,54 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         document.getElementById('groupsPieButton').classList.toggle('btn-secondary', mode !== 'groups');
     }
 
+    function updateProgressBar(loadPercentage) {
+        const progressBar = document.querySelector(".progress-bar");
 
+        if (!progressBar) {
+            console.error("Progress bar element not found!");
+            return;
+        }
+
+        // Set the progress bar width and aria attributes
+        progressBar.style.width = `${loadPercentage}%`;
+        progressBar.setAttribute("aria-valuenow", loadPercentage);
+
+        // Change the progress bar's background color based on the percentage
+        if (loadPercentage >= 80) {
+            progressBar.style.backgroundColor = "darkred"; // High load
+        } else if (loadPercentage >= 50) {
+            progressBar.style.backgroundColor = "orange"; // Moderate load
+        } else {
+            progressBar.style.backgroundColor = "lightgreen"; // Low load
+        }
+    }
+
+    function highlightOverdueTasks() {
+        const taskItems = document.querySelectorAll(".task-item");
+
+        if (!taskItems) {
+            console.error("Task items not found!");
+            return;
+        }
+
+        // Get the current date and time
+        const now = new Date();
+
+        // Loop through each task item
+        taskItems.forEach(taskItem => {
+            // Extract the due date from the task's data attribute or inner HTML
+            const dueDateElement = taskItem.querySelector(".task-info small");
+            if (dueDateElement) {
+                const dueDateText = dueDateElement.textContent.replace("Due: ", "");
+                const dueDate = new Date(dueDateText);
+
+                // Check if the task is overdue
+                if (dueDate < now) {
+                    taskItem.style.backgroundColor = "lightcoral"; // Highlight overdue tasks
+                }
+            }
+        });
+    }
 
 
 
@@ -373,6 +426,18 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         showView('listView');
         showListView('tasks');
 
+        // Example: Use PHP to pass the `load_percentage` to JavaScript
+        const progressBar = document.getElementById("loadProgressBar");
+        const loadPercentage = <?php echo round($load_percentage); ?>;
+
+        // Call the updateProgressBar function with the initial load percentage
+        updateProgressBar(loadPercentage);
+
+        if (progressBar) {
+            progressBar.addEventListener("click", () => {
+                window.location.href = "index.php?page=pastLoad";
+            });
+        }
         // Event listeners for switching between views
         document.getElementById('listViewButton').addEventListener('click', () => showView('listView'));
         document.getElementById('pieChartViewButton').addEventListener('click', () => showView('pieChartView'));
@@ -394,6 +459,7 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
             showPieChart('groups');
         });
 
+        highlightOverdueTasks();
     });
 
 </script>
