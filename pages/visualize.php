@@ -481,10 +481,7 @@ try {
                 const dueDateText = dueDateElement.textContent.replace("Due: ", "");
                 const dueDate = new Date(dueDateText);
 
-                // Check if the task is overdue
-                if (dueDate < now) {
-                    taskItem.style.backgroundColor = "lightcoral"; // Highlight overdue tasks
-                }
+
             }
         });
     }
