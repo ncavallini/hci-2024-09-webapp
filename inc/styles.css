@@ -73,12 +73,6 @@ a.link-with-icon::before {
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.task-item:hover {
-  background-color: #46494d; /* Darker background color */
-  color: #ffffff; /* Optional: Change text color to white for better contrast */
-  cursor: pointer; /* Change cursor to indicate interactivity */
-}
-
 .task-info h5 {
   margin: 0;
 }
