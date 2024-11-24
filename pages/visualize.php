@@ -266,13 +266,12 @@ try {
 
 
 function showListView(mode) {
-
     const container = document.getElementById('taskItems');
     container.innerHTML = '';
 
     if (mode === 'tasks') {
         tasks.forEach(task => {
-            const color = generateColor(task.group_name); // Generate color based on group
+            const color = generateColor(task.group_name);
             const isCompleted = task.is_completed === 1; // Check if the task is completed
 
             const taskDiv = document.createElement('div');
