@@ -4,27 +4,110 @@
   <a href="index.php?page=visualize" class="text-center list-group-item list-group-item-action active"><i class="fa-solid fa-chart-pie"></i> Visualize</a>
 </div>
 
+<p>&nbsp;&nbsp;</p>
+
+<div class="card">
+  <div class="card-header">
+  <div class="card-title h5">Tasks due <i>Today</i> </div>
+  </div>
+  <div class="card-body">
+    <?php
+    $sql = "(SELECT t.task_id, t.title, 0 AS group_id, NULL as group_name FROM tasks t WHERE DATE(due_date) = :due_date AND user_id = :user_id AND is_completed = 0) UNION ALL 
+            (SELECT gt.group_task_id, gt.title, gt.group_id, g.name as group_name FROM group_tasks gt JOIN groups g USING(group_id) WHERE DATE(due_date) = :due_date AND user_id = :user_id AND is_completed = 0)";
+    $stmt = $dbconnection->prepare($sql);
+    $tasks = $stmt->fetchAll();
+    $stmt->bindValue(":due_date", date("Y-m-d"));
+    $stmt->bindValue(":user_id", Auth::user()['user_id']);
+
+    $stmt->execute();
+    $tasks = $stmt->fetchAll();
+
+    if (count($tasks) == 0) {
+      echo "<p class='text-center'>No (incomplete) tasks due today</p>";
+      goto end_task_due_today;
+    } 
+    echo '<ul class="list-group list-group-flush">';
+    foreach($tasks as $task) {
+      echo "<li class='list-group-item'>{$task['title']} &nbsp;&nbsp;";
+      if($task['group_id'] != 0) {
+        echo "<span class='badge bg-secondary rounded-pill'>{$task['group_name']}</span>";
+      }
+      else {
+        echo "<span class='badge bg-primary rounded-pill'>Personal</span>";
+      }
+      echo "</li>"; 
+    }
+    end_task_due_today:
+    ?>
+  </div>
+</div>
+<p>&nbsp;&nbsp;</p>
+<hr>
+
 <!-- <div style="width: 100%; height: 500px; background-color: lightgray;">Home Widgets</div> -->
 
-<div class="row row-cols-1 row-cols-md-2 g-4">
-  <?php
-  $sql = "SELECT m.group_id, g.name FROM membership m JOIN groups g ON m.group_id = g.group_id WHERE m.username = ?";
-  $stmt = $dbconnection->prepare($sql);
-  $stmt->execute([Auth::user()['username']]);
-  $groups = $stmt->fetchAll();
-  foreach ($groups as $group) {
-    echo "<div class='col'>";
-    echo "<div class='card'>";
-    echo "<div class='card-body'>";
-    echo "<p class='h5'>{$group['name']}</p>";
-    echo "</div>";
-    echo "</div>";
-    echo "</div>";
-  }
 
-  ?>
+<?php 
+$query = "SELECT m.group_id, g.name FROM membership m JOIN groups g ON m.group_id = g.group_id WHERE m.username = ?";
+$stmt = $dbconnection->prepare($query);
+$stmt->execute([$user['username']]);
+$groups = $stmt->fetchAll();
+
+?>
+
+<div class="card">
+  <div class="card-header">
+  <div class="card-title h5">Groups & Members</div>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+          <?php for($i = 0; $i < count($groups); $i++) echo "<th></th>"; ?>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+          <?php
+            foreach($groups as $group) {
+              echo "<td><p class='h5'>{$group['name']}</p></td>";
+            }
+          ?>
+          </tr>
+
+          <?php
+          $max_members = 0;
+          foreach($groups as $group) {
+            $query = "SELECT username FROM membership WHERE group_id = ?";
+            $stmt = $dbconnection->prepare($query);
+            $stmt->execute([$group['group_id']]);
+            $members = $stmt->fetchAll();
+            $group['members'] = $members;
+            $max_members = max($max_members, count($members));
+        
+          }
+          
+          for($i = 0; $i < $max_members; $i++) {
+            echo "<tr>";
+            foreach($groups as $group) {
+              var_dump($group);
+              /*if($i < count($group['members'])) {
+                echo "<td>{$group['members'][$i]['username']}</td>";
+              }
+              else {
+                echo "<td></td>";
+              }
+            }
+            echo "</tr>";
+            */
+          }}
+
+          ?>
+          </tbody>
+      </table>        
+    </div>
 </div>
-
 
 
 <div class="list-group">

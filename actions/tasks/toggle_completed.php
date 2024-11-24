@@ -11,11 +11,11 @@ $task_id = $_GET['task_id'];
 
 
 if($group_id == 0) {
-    $sql = "UPDATE tasks SET is_completed = NOT is_completed WHERE task_id = ?";
+    $sql = "UPDATE tasks SET is_completed = NOT is_completed, completed_at = NOW() WHERE task_id = ?";
     $location = "../../index.php?page=manage_personal";
 }
 else {
-    $sql = "UPDATE group_tasks SET is_completed = NOT is_completed WHERE group_task_id = ?";
+    $sql = "UPDATE group_tasks SET is_completed = NOT is_completed, completed_at = NOW() WHERE group_task_id = ?";
     $location = "../../index.php?page=group&id=$group_id";
 
 }
