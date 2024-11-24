@@ -266,6 +266,7 @@ try {
 
 
 function showListView(mode) {
+    
     const container = document.getElementById('taskItems');
     container.innerHTML = ''; // Clear existing content
 
