@@ -266,9 +266,9 @@ try {
 
 
 function showListView(mode) {
-    
+
     const container = document.getElementById('taskItems');
-    container.innerHTML = ''; // Clear existing content
+    container.innerHTML = '';
 
     if (mode === 'tasks') {
         tasks.forEach(task => {
