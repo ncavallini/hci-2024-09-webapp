@@ -329,21 +329,32 @@ try {
             });
         } else if (mode === "groups") {
             const groupedTasks = tasks.reduce((acc, task) => {
-                acc[task.group_name] = acc[task.group_name] || [];
-                acc[task.group_name].push(task);
+                acc[task.group_name] = acc[task.group_name] || { group_id: task.group_id, tasks: [] };
+                acc[task.group_name].tasks.push(task);
                 return acc;
             }, {});
 
-            Object.entries(groupedTasks).forEach(([groupName, groupTasks]) => {
+
+            //NICCOLO HELP
+            Object.entries(groupedTasks).forEach(([groupName, groupData]) => {
                 const groupDiv = document.createElement("div");
                 groupDiv.className = "group-item border rounded p-3 mb-3";
-                groupDiv.onclick = () => showGroupDetails(groupName, groupTasks);
                 groupDiv.innerHTML = `
-                    <h5>${groupName}</h5>
-                    <p>${groupTasks.length} tasks in this group</p>
+                    <h5>
+                        <a href="#" class="text-decoration-none group-link">${groupName}</a>
+                    </h5>
+                    <p>${groupData.tasks.length} tasks in this group</p>
                 `;
+
+                // Add click event listener for redirection
+                groupDiv.querySelector(".group-link").addEventListener("click", (event) => {
+                    event.preventDefault(); // Prevent the default link behavior
+                    window.location.href = `index.php?page=visualize=group&id=${groupData.group_id}`;
+                });
+
                 container.appendChild(groupDiv);
             });
+
     }
 
     document.getElementById("taskListButton").classList.toggle("btn-primary", mode === "tasks");
@@ -351,31 +362,6 @@ try {
     document.getElementById("groupListButton").classList.toggle("btn-primary", mode === "groups");
     document.getElementById("groupListButton").classList.toggle("btn-secondary", mode !== "groups");
 }
-
-
-
-
-
-    function showGroupDetails(groupName, groupTasks) {
-        // Populate the modal with group details
-        document.getElementById('groupName').textContent = groupName;
-
-        const groupTasksList = document.getElementById('groupTasksList');
-        groupTasksList.innerHTML = '';
-
-        // Add tasks to the group list
-        groupTasks.forEach(task => {
-            const taskItem = document.createElement('li');
-            taskItem.innerHTML = `
-                <strong>${task.title}</strong> (Load: ${task.estimated_load})<br>
-                Due: ${new Date(task.due_date).toLocaleString()}
-            `;
-            groupTasksList.appendChild(taskItem);
-        });
-
-        // Show the modal
-        new bootstrap.Modal(document.getElementById('groupDetailsModal')).show();
-    }
 
 
 
@@ -393,29 +379,46 @@ try {
     function showPieChart(mode) {
         currentMode = mode; // Remember the current mode
         const tasks = <?php echo json_encode($tasks); ?>;
+        const ctx = document.getElementById("pieChart").getContext("2d");
 
-        let data;
+        let pieData;
+
         if (mode === 'tasks') {
-            data = tasks.map(task => ({ label: task.title, value: task.estimated_load }));
-        } else if (mode === 'groups') {
-            const groupData = tasks.reduce((acc, task) => {
-                acc[task.group_name] = (acc[task.group_name] || 0) + task.estimated_load;
-                return acc;
-            }, {});
-            data = Object.entries(groupData).map(([label, value]) => ({ label, value }));
-        }
-
-        const ctx = document.getElementById('pieChart').getContext('2d');
-        if (pieChart) pieChart.destroy();
-        pieChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: data.map(d => d.label),
+            // Prepare data for tasks
+            pieData = {
+                labels: tasks.map(task => task.title),
                 datasets: [{
-                    data: data.map(d => d.value),
+                    data: tasks.map(task => task.estimated_load),
                     backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6610f2']
                 }]
-            },
+            };
+        } else if (mode === 'groups') {
+            // Prepare data for groups
+            const groupData = tasks.reduce((acc, task) => {
+                acc[task.group_name] = acc[task.group_name] || { group_id: task.group_id, load: 0 };
+                acc[task.group_name].load += task.estimated_load;
+                return acc;
+            }, {});
+
+            pieData = {
+                labels: Object.keys(groupData),
+                datasets: [{
+                    data: Object.values(groupData).map(group => group.load),
+                    backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6610f2']
+                }]
+            };
+        } else {
+            console.error("Invalid mode provided for pie chart");
+            return;
+        }
+
+        // Destroy previous chart instance if it exists
+        if (pieChart) pieChart.destroy();
+
+        // Create the new pie chart
+        pieChart = new Chart(ctx, {
+            type: 'pie',
+            data: pieData,
             options: {
                 responsive: true,
                 plugins: {
@@ -423,9 +426,22 @@ try {
                     tooltip: {
                         callbacks: {
                             label: (tooltipItem) => {
-                                const label = data[tooltipItem.dataIndex].label;
-                                const value = data[tooltipItem.dataIndex].value;
+                                const label = pieData.labels[tooltipItem.dataIndex];
+                                const value = pieData.datasets[0].data[tooltipItem.dataIndex];
                                 return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                },
+                onClick: (event, elements) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        if (mode === 'groups') {
+                            const groupName = pieData.labels[index];
+                            const group = tasks.find(task => task.group_name === groupName);
+                            if (group) {
+                                //NICCOLO HELP
+                                window.location.href = `index.php?page=visualize=group&id=${group.group_id}`;
                             }
                         }
                     }
@@ -439,6 +455,7 @@ try {
         document.getElementById('groupsPieButton').classList.toggle('btn-primary', mode === 'groups');
         document.getElementById('groupsPieButton').classList.toggle('btn-secondary', mode !== 'groups');
     }
+
 
     function updateProgressBar(loadPercentage) {
         const progressBar = document.querySelector(".progress-bar");
