@@ -45,7 +45,7 @@
 <ul class="list-group">
   <li class="list-group-item"><i class="fa fa-user me-1"></i><?php echo $user['first_name'] . " " . $user['last_name'] ?></li>
   <li class="list-group-item"><i class="fa fa-at me-1"></i><?php echo $user['email'] ?></li>
-  <li class="list-group-item bg-warning"><i class="fa fa-coins me-1"></i><?php echo $user['coins'] ?> coins</li>
+  <li class="list-group-item bg-warning"><i class="fa fa-coins me-1"></i><?php echo UserUtils::get_coins() ?> coins</li>
   <li class="list-group-item list-group-item-action" onclick="javascript:window.location.href='index.php?page=edit_profile'"><i class="fa fa-edit me-1"></i>Edit Profile</li>
   <li class="list-group-item list-group-item-action list-group-item-danger" onclick="confirmProfileDeletion()"><i class="fa fa-trash me-1"></i>Delete Profile</li>
 

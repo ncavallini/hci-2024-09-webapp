@@ -16,7 +16,7 @@
         <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
 
         <li class="nav-item">
-          <span class="badge rounded-pill bg-warning"><i class="fa fa-coins"></i> <?php echo $user['coins'] ?></span>
+          <span class="badge rounded-pill bg-warning"><i class="fa fa-coins"></i> <?php echo UserUtils::get_coins(); ?></span>
           </li>
 
           <li class="nav-item">
