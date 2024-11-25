@@ -9,20 +9,29 @@ $connection = DBConnection::get_connection();
 $group_id = $_GET['group_id'] ?? 0; 
 $task_id = $_GET['task_id'];
 
-$sql = "SELECT estimated_load FROM tasks WHERE task_id = ?";
-$stmt = $connection->prepare($sql);
-$stmt->execute([$task_id]);
-$estimated_load = $stmt->fetchColumn();
-var_dump($estimated_load);
+
 
 
 
 if($group_id == 0) {
+
+    $sql = "SELECT estimated_load FROM tasks WHERE task_id = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->execute([$task_id]);
+    $estimated_load = $stmt->fetchColumn();
+    var_dump('Estimated load ' . (int)$estimated_load);
    
     $sql = "UPDATE tasks SET is_completed = NOT is_completed, completed_at = NOW() WHERE task_id = ?";    
     $location = "../../index.php?page=manage_personal";
 }
 else {
+
+    $sql = "SELECT estimated_load FROM group_tasks WHERE group_task_id = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->execute([$task_id]);
+    $estimated_load = $stmt->fetchColumn();
+    var_dump('Estimated load ' . (int)$estimated_load);
+
     $sql = "UPDATE group_tasks SET is_completed = NOT is_completed, completed_at = NOW() WHERE group_task_id = ?";
     $location = "../../index.php?page=group&id=$group_id";
 }
@@ -63,5 +72,5 @@ $stmt = $connection->prepare($sql);
 $stmt->execute([$coins_to_add, Auth::user()['user_id']]);
 
 
-header("Location: $location");
+//header("Location: $location");
 ?>
