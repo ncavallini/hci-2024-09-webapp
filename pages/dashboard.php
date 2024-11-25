@@ -76,7 +76,7 @@ $groups = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <?php
           $max_members = 0;
           foreach($groups as &$group) {
-            $query = "SELECT username FROM membership WHERE group_id = ?";
+            $query = "SELECT m.username, u.first_name, u.last_name FROM membership m JOIN users u USING(username) WHERE group_id = ?";
             $stmt = $dbconnection->prepare($query);
             $stmt->execute([$group['group_id']]);
             $members = $stmt->fetchAll();
@@ -88,9 +88,9 @@ $groups = $stmt->fetchAll(PDO::FETCH_ASSOC);
           for($i = 0; $i < $max_members; $i++) {
             echo "<tr class='border-start'>";
             foreach($groups as $group) {
-//              var_dump($group);
               if($i < count($group['members'])) {
-                echo "<td class='border-start'>{$group['members'][$i]['username']}</td>";
+                $name = $group['members'][$i]['first_name'] . ' ' . $group['members'][$i]['last_name'] ;
+                echo "<td class='border-start'>{$name}</td>";
               }
               else {
                 echo "<td class='border-start'></td>";

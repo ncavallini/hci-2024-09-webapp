@@ -42,5 +42,13 @@ class UserUtils {
         }
         return $max;
     }
+
+    public static function get_coins() : int {
+        $dbconnection = DBConnection::get_connection();
+        $sql = "SELECT coins FROM users WHERE user_id = ?";
+        $stmt = $dbconnection->prepare($sql);
+        $stmt->execute([Auth::user()['user_id']]);
+        return $stmt->fetchColumn();
+    }
 }
 ?>

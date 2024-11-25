@@ -6,7 +6,7 @@ class DBConnection {
     
 
     private function __construct() {
-        $this->connection = new PDO($this->get_connection_string(), $_ENV['DB_USER'], $_ENV['DB_PASSWORD']);        
+        $this->connection = new PDO($this->get_connection_string(), $_ENV['DB_USER'], $_ENV['DB_PASSWORD'], [PDO::FETCH_ASSOC]);        
     }
 
     public static function get_instance() {
