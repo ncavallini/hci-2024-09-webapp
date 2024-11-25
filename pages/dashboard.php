@@ -42,16 +42,13 @@
   </div>
 </div>
 <p>&nbsp;&nbsp;</p>
-<hr>
-
-<!-- <div style="width: 100%; height: 500px; background-color: lightgray;">Home Widgets</div> -->
 
 
 <?php 
 $query = "SELECT m.group_id, g.name FROM membership m JOIN groups g ON m.group_id = g.group_id WHERE m.username = ?";
 $stmt = $dbconnection->prepare($query);
 $stmt->execute([$user['username']]);
-$groups = $stmt->fetchAll();
+$groups = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
@@ -61,7 +58,7 @@ $groups = $stmt->fetchAll();
   </div>
   <div class="card-body">
     <div class="table-responsive">
-      <table class="table">
+      <table class="table table-borderless">
         <thead>
           <tr>
           <?php for($i = 0; $i < count($groups); $i++) echo "<th></th>"; ?>
@@ -78,7 +75,7 @@ $groups = $stmt->fetchAll();
 
           <?php
           $max_members = 0;
-          foreach($groups as $group) {
+          foreach($groups as &$group) {
             $query = "SELECT username FROM membership WHERE group_id = ?";
             $stmt = $dbconnection->prepare($query);
             $stmt->execute([$group['group_id']]);
@@ -89,19 +86,19 @@ $groups = $stmt->fetchAll();
           }
           
           for($i = 0; $i < $max_members; $i++) {
-            echo "<tr>";
+            echo "<tr class='border-start'>";
             foreach($groups as $group) {
-              var_dump($group);
-              /*if($i < count($group['members'])) {
-                echo "<td>{$group['members'][$i]['username']}</td>";
+//              var_dump($group);
+              if($i < count($group['members'])) {
+                echo "<td class='border-start'>{$group['members'][$i]['username']}</td>";
               }
               else {
-                echo "<td></td>";
+                echo "<td class='border-start'></td>";
               }
             }
             echo "</tr>";
-            */
-          }}
+            
+          }
 
           ?>
           </tbody>
