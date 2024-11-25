@@ -19,7 +19,7 @@ if($group_id == 0) {
     $stmt = $connection->prepare($sql);
     $stmt->execute([$task_id]);
     $estimated_load = $stmt->fetchColumn();
-    var_dump('Estimated load ' . (int)$estimated_load);
+    //var_dump('Estimated load ' . (int)$estimated_load);
    
     $sql = "UPDATE tasks SET is_completed = NOT is_completed, completed_at = NOW() WHERE task_id = ?";    
     $location = "../../index.php?page=manage_personal";
@@ -67,10 +67,10 @@ else if($is_completed == 0) {
 }
 
 
-$sql = "UPDATE users SET coins = coins + (?) WHERE user_id = ?";
+$sql = "UPDATE users SET coins = GREATEST(0, coins + (?)) WHERE user_id = ?";
 $stmt = $connection->prepare($sql);
 $stmt->execute([$coins_to_add, Auth::user()['user_id']]);
 
 
-//header("Location: $location");
+header("Location: $location");
 ?>
