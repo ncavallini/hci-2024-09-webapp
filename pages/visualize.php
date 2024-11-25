@@ -104,7 +104,9 @@ try {
     $tasks = array_merge($personalTasks, $groupTasks);
 
     // Calculate total mental load
-    $total_load = array_sum(array_column($tasks, 'estimated_load'));
+    $total_load = array_sum(array_map(function ($task) {
+        return !$task['is_completed'] ? $task['estimated_load'] : 0;
+    }, $tasks));
 
     // Fetch and update maximum load
     $sql = "SELECT max_load FROM users WHERE user_id = ?";
