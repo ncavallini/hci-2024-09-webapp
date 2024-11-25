@@ -348,7 +348,7 @@ try {
                     if(groupData.group_id != 0)
                         window.location.href = `index.php?page=groupview&id=${groupData.group_id}`
                     else 
-                        window.location.href = `index.php?page=manage_personal`
+                        window.location.href = `index.php?page=visualize_personal`
                 });
 
                 container.appendChild(groupDiv);
@@ -441,7 +441,27 @@ try {
                             const group = tasks.find(task => task.group_name === groupName);
                             if (group) {
                                 //NICCOLO HELP
-                             //   window.location.href = `index.php?page=visualize=group&id=${group.group_id}`;
+                                Object.entries(groupedTasks).forEach(([groupName, groupData]) => {
+                                    const groupDiv = document.createElement("div");
+                                    groupDiv.className = "group-item border rounded p-3 mb-3";
+                                    groupDiv.innerHTML = `
+                                        <h5>
+                                            <a href="#" class="text-decoration-none group-link">${groupName}</a>
+                                        </h5>
+                                        <p>${groupData.tasks.length} tasks in this group</p>
+                                    `;
+
+                                    // Add click event listener for redirection
+                                    groupDiv.querySelector(".group-link").addEventListener("click", (event) => {
+                                        event.preventDefault(); // Prevent the default link behavior
+                                        if(groupData.group_id != 0)
+                                            window.location.href = `index.php?page=groupview&id=${groupData.group_id}`
+                                        else 
+                                            window.location.href = `index.php?page=visualize_personal`
+                                    });
+
+                                    container.appendChild(groupDiv);
+                                });
                             }
                         }
                     }
