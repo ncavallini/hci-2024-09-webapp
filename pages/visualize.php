@@ -41,6 +41,7 @@ $stmt = $dbconnection->prepare($sql);
 $stmt->execute([$user_id]);
 $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
 // Calculate the total mental load
 $total_load = array_sum(array_column($tasks, 'estimated_load'));
 
@@ -299,8 +300,10 @@ try {
 
         const tasks = <?php echo json_encode($tasks); ?>;
 
+        const activeTasks = tasks.filter(task => task.is_completed !== 1);
+
         if (mode === "tasks") {
-            tasks.forEach(task => {
+            activeTasks.forEach(task => {
                 const isCompleted = task.is_completed === 1;
                 const dueDate = new Date(task.due_date);
                 const now = new Date();
