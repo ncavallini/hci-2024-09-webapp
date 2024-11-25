@@ -536,3 +536,124 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
         cursor: pointer;
     }
 </style>
+
+<!-- AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA -->
+
+<?php
+require_once __DIR__ . "/../utils/init.php";
+
+// Ensure the user is logged in
+if (!Auth::is_logged_in()) {
+    header("Location: ../../index.php?page=login");
+    die;
+}
+
+// Get the group ID from the URL
+$group_id = $_GET['id'] ?? null;
+
+if (!$group_id || !is_numeric($group_id)) {
+    die("Invalid group ID.");
+}
+
+// Get the current user's ID
+$user_id = Auth::user()['user_id'];
+
+// Fetch total mental loads for all users in the group
+$sql = "
+    SELECT 
+        gt.user_id, 
+        u.first_name, 
+        u.last_name, 
+        SUM(gt.estimated_load) AS total_load
+    FROM 
+        group_tasks gt
+    JOIN 
+        users u ON gt.user_id = u.user_id
+    WHERE 
+        gt.group_id = ?
+    GROUP BY 
+        gt.user_id
+    ORDER BY 
+        total_load DESC
+";
+$stmt = $dbconnection->prepare($sql);
+$stmt->execute([$group_id]);
+$user_loads = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Find the current user's load
+$current_user_load = 0;
+foreach ($user_loads as $user) {
+    if ($user['user_id'] == $user_id) {
+        $current_user_load = $user['total_load'];
+        break;
+    }
+}
+?>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Mental Load Comparison</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container mt-5">
+    <h1 class="mb-4">Group Mental Load Comparison</h1>
+
+    <!-- Bar Chart -->
+    <div>
+        <canvas id="compareChart" width="400" height="200"></canvas>
+    </div>
+</div>
+
+<script>
+    const userLoads = <?php echo json_encode($user_loads); ?>;
+    const currentUserId = <?php echo json_encode($user_id); ?>;
+
+    function renderComparisonChart(users) {
+        const ctx = document.getElementById('compareChart').getContext('2d');
+        const labels = users.map(user => {
+            if (user.user_id == currentUserId) return `${user.first_name} ${user.last_name} (You)`;
+            return `${user.first_name} ${user.last_name}`;
+        });
+        const data = users.map(user => user.total_load);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Mental Load',
+                    data: data,
+                    backgroundColor: users.map(user => 
+                        user.user_id == currentUserId ? '#007bff' : '#ffc107'
+                    )
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Mental Load'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (tooltipItem) => `${tooltipItem.raw} units`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        renderComparisonChart(userLoads);
+    });
+</script>
+
