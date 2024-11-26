@@ -59,7 +59,7 @@
 
 
     // LOADING ANIMATION
-    document.querySelectorAll('a').forEach(link => {
+    document.querySelectorAll('a:not(.no-loading)').forEach(link => {
       link.addEventListener('click', function (e) {
         e.preventDefault();
         document.getElementById('loading').style.display = 'flex';
