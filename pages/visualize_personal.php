@@ -216,8 +216,37 @@ try {
             });
         }
 
+        function updateProgressBar(loadPercentage) {
+            const progressBar = document.querySelector(".progress-bar");
+
+            if (!progressBar) {
+                console.error("Progress bar element not found!");
+                return;
+            }
+
+            // Set the progress bar width and aria attributes
+            progressBar.style.width = `${loadPercentage}%`;
+            progressBar.setAttribute("aria-valuenow", loadPercentage);
+
+            // Change the progress bar's background color based on the percentage
+            if (loadPercentage >= 80) {
+                progressBar.style.backgroundColor = "darkred"; // High load
+            } else if (loadPercentage >= 50) {
+                progressBar.style.backgroundColor = "orange"; // Moderate load
+            } else {
+                progressBar.style.backgroundColor = "lightgreen"; // Low load
+            }
+        }
+
+
         document.addEventListener('DOMContentLoaded', () => {
             showView('listView');
+
+            showView('listView');
+
+            // Update the progress bar with the current load percentage
+            const loadPercentage = <?php echo round($load_percentage); ?>;
+            updateProgressBar(loadPercentage);
         });
     </script>
 
