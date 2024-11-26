@@ -68,6 +68,8 @@ try {
     <title>Personal Tasks</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 </head>
 <body>
     <div class="container mt-5">
@@ -88,13 +90,14 @@ try {
                     <?php echo round($load_percentage); ?>%
                 </div>
             </div>
-            <p class="mt-2">Personal Tasks' Load: <?php echo $total_load; ?> / Maximum Load: <?php echo $max_load; ?></p>
+            <p class="mt-2">Personal Tasks Load: <?php echo $total_load; ?> / Maximum Load: <?php echo $max_load; ?></p>
         </div>
 
         <!-- Buttons for List and Pie Chart Views -->
         <div class="d-flex justify-content-between mb-3">
             <button id="listViewButton" class="btn btn-primary" onclick="showView('listView')">List View</button>
             <button id="pieChartViewButton" class="btn btn-secondary" onclick="showView('pieChartView')">Pie Chart View</button>
+            <button id="bubbleChartViewButton" class="btn btn-secondary" onclick="showView('bubbleChartView')">Bubble Chart View</button>
         </div>
 
         <!-- List View -->
@@ -127,6 +130,10 @@ try {
         <!-- Pie Chart View -->
         <div id="pieChartView" style="display: none;">
             <canvas id="pieChart" width="400" height="400"></canvas>
+        </div>
+
+        <div id="bubbleChartView" style="display: none">
+            <canvas id="bubbleChart" width="400" height="400"></canvas>
         </div>
     </div>
 
