@@ -27,6 +27,7 @@ try {
             tasks t ON at.task_id = t.task_id
         WHERE 
             at.group_id = 0 AND at.user_id = ?
+            AND (t.is_completed = 0 OR t.is_completed IS NULL)
         ORDER BY 
             t.is_completed ASC, at.due_date ASC";
     $stmt = $dbconnection->prepare($sql);
@@ -113,11 +114,7 @@ try {
                         </div>
                         <div>
                             <span class="badge badge-primary badge-pill">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
-                            <?php if ($task['is_completed']): ?>
-                                <span class="badge badge-success badge-pill">Completed</span>
-                            <?php else: ?>
-                                <span class="badge badge-warning badge-pill">Pending</span>
-                            <?php endif; ?>
+                            
                         </div>
                     </div>
                 <?php endforeach; ?>
