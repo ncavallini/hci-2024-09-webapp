@@ -21,5 +21,5 @@
         ":password_hash" => password_hash($_POST["password"], PASSWORD_BCRYPT)
     ]);
 
-    print_alert("User created successfully! <a href='../index.php?page=login' class='link alert-link'>Go to Log In</a>'", true, "success");
+    print_alert("User created successfully! <a href='../../index.php?page=login' class='link alert-link'>Go to Log In</a>'", true, "success");
 ?>
