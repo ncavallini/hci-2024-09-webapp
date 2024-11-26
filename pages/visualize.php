@@ -156,15 +156,15 @@ try {
     </div>
 
     <!-- Buttons Row -->
-    <div class="d-flex justify-content-between mb-3">
+    <div class="d-flex justify-content-between mb-3 gap-2">
         <!-- Left-aligned Task/Group Buttons -->
-        <div>
+        <div class="d-flex flex-wrap gap-2">
             <button id="taskListButton" class="btn btn-primary" onclick="showListView('tasks')">Tasks</button>
             <button id="groupListButton" class="btn btn-secondary" onclick="showListView('groups')">Groups</button>
         </div>
 
         <!-- Right-aligned List/Pie Chart View Buttons -->
-        <div>
+        <div class="d-flex flex-wrap gap-2">
             <button id="listViewButton" class="btn btn-primary" onclick="showView('listView')">List View</button>
             <button id="pieChartViewButton" class="btn btn-secondary" onclick="showView('pieChartView')">Pie Chart View</button>
         </div>
@@ -572,5 +572,21 @@ try {
     .task-item:hover {
         background-color: #e9ecef;
         cursor: pointer;
-    }
+    }
+
+    .btn-uniform {
+        min-width: 120px; /* Set a uniform minimum width */
+        text-align: center; /* Center align text */
+    }
+
+    @media (max-width: 576px) {
+        .btn-uniform {
+            min-width: 100px; /* Adjust size for smaller screens */
+        }
+    }
+
+    .d-flex .btn {
+        flex-grow: 1; /* Ensures buttons expand equally */
+    }
+
 </style>
