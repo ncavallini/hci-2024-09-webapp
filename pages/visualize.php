@@ -381,105 +381,75 @@ try {
     }
 
     function showPieChart(mode) {
-        currentMode = mode; // Remember the current mode
-        const tasks = <?php echo json_encode($tasks); ?>;
-        const ctx = document.getElementById("pieChart").getContext("2d");
+    currentMode = mode; // Remember the current mode
+    const tasks = <?php echo json_encode($tasks); ?>;
+    const ctx = document.getElementById("pieChart").getContext("2d");
 
-        let pieData;
+    // Filter tasks to exclude completed ones
+    const activeTasks = tasks.filter(task => parseInt(task.is_completed, 10) === 0);
 
-        if (mode === 'tasks') {
-            // Prepare data for tasks
-            pieData = {
-                labels: tasks.map(task => task.title),
-                datasets: [{
-                    data: tasks.map(task => task.estimated_load),
-                    backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6610f2']
-                }]
-            };
-        } else if (mode === 'groups') {
-            // Prepare data for groups
-            const groupData = tasks.reduce((acc, task) => {
-                acc[task.group_name] = { group_name: task.group_name, group_id: task.group_id, load: task.estimated_load };
-                // acc[task.group_name].load += task.estimated_load;
-                return acc;
-            }, {});
-            console.log(groupData);
+    console.log("Active tasks for pie chart:", activeTasks); // Debugging active tasks
 
-            pieData = {
-                labels: Object.keys(groupData),
-                datasets: [{
-                    data: Object.values(groupData).map(group => group.load),
-                    backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6610f2']
-                }]
-            };
-        } else {
-            console.error("Invalid mode provided for pie chart");
-            return;
-        }
+    let pieData;
 
-        // Destroy previous chart instance if it exists
-        if (pieChart) pieChart.destroy();
+    if (mode === 'tasks') {
+        // Prepare data for tasks
+        pieData = {
+            labels: activeTasks.map(task => task.title),
+            datasets: [{
+                data: activeTasks.map(task => task.estimated_load),
+                backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6610f2']
+            }]
+        };
+    } else if (mode === 'groups') {
+        // Prepare data for groups
+        const groupData = activeTasks.reduce((acc, task) => {
+            if (!acc[task.group_name]) {
+                acc[task.group_name] = { group_id: task.group_id, load: 0 };
+            }
+            acc[task.group_name].load += task.estimated_load;
+            return acc;
+        }, {});
 
-        // Create the new pie chart
-        pieChart = new Chart(ctx, {
-            type: 'pie',
-            data: pieData,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: 'top' },
-                    tooltip: {
-                        callbacks: {
-                            label: (tooltipItem) => {
-                                const label = pieData.labels[tooltipItem.dataIndex];
-                                const value = pieData.datasets[0].data[tooltipItem.dataIndex];
-                                return `${label}: ${value}`;
-                            }
-                        }
-                    }
-                },
-                onClick: (event, elements) => {
-                    if (elements.length > 0) {
-                        const index = elements[0].index;
-                        if (mode === 'groups') {
-                            const groupName = pieData.labels[index];
-                            const group = tasks.find(task => task.group_name === groupName);
-                            if (group) {
-                                //NICCOLO HELP
-                                Object.entries(groupedTasks).forEach(([groupName, groupData]) => {
-                                    const groupDiv = document.createElement("div");
-                                    groupDiv.className = "group-item border rounded p-3 mb-3";
-                                    groupDiv.innerHTML = `
-                                        <h5>
-                                            <a href="#" class="text-decoration-none group-link">${groupName}</a>
-                                        </h5>
-                                        <p>${groupData.tasks.length} tasks in this group</p>
-                                    `;
+        console.log("Group data for pie chart:", groupData); // Debugging grouped data
 
-                                    // Add click event listener for redirection
-                                    groupDiv.querySelector(".group-link").addEventListener("click", (event) => {
-                                        event.preventDefault(); // Prevent the default link behavior
-                                        if(groupData.group_id != 0)
-                                            window.location.href = `index.php?page=groupview&id=${groupData.group_id}`
-                                        else 
-                                            window.location.href = `index.php?page=visualize_personal`
-                                    });
+        pieData = {
+            labels: Object.keys(groupData),
+            datasets: [{
+                data: Object.values(groupData).map(group => group.load),
+                backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6610f2']
+            }]
+        };
+    } else {
+        console.error("Invalid mode provided for pie chart");
+        return;
+    }
 
-                                    container.appendChild(groupDiv);
-                                });
-                            }
+    // Destroy previous chart instance if it exists
+    if (pieChart) pieChart.destroy();
+
+    // Create the new pie chart
+    pieChart = new Chart(ctx, {
+        type: 'pie',
+        data: pieData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: (tooltipItem) => {
+                            const label = pieData.labels[tooltipItem.dataIndex];
+                            const value = pieData.datasets[0].data[tooltipItem.dataIndex];
+                            return `${label}: ${value}`;
                         }
                     }
                 }
             }
-        });
+        }
+    });
+}
 
-        // Update button styles for Task/Group toggle
-        document.getElementById('tasksPieButton').classList.toggle('btn-primary', mode === 'tasks');
-        document.getElementById('tasksPieButton').classList.toggle('btn-secondary', mode !== 'tasks');
-        document.getElementById('groupsPieButton').classList.toggle('btn-primary', mode === 'groups');
-        document.getElementById('groupsPieButton').classList.toggle('btn-secondary', mode !== 'groups');
-    }
 
 
     function updateProgressBar(loadPercentage) {
