@@ -24,6 +24,17 @@
 
     ?>
     </main> 
+
+
+    <div id="loading" style="display: none;">
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </div>
+
+
     <?php
 
     require_once __DIR__ . "/template/footer.php";
@@ -45,4 +56,34 @@
     Toast.create(toast);
     
     }
+
+
+    // LOADING ANIMATION
+    document.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.getElementById('loading').style.display = 'flex';
+        window.location.href = this.href;
+         
+      });
+    });
+
+    window.onload = function () {
+      document.getElementById('loading').style.display = 'none';
+    };
 </script>
+
+<style>
+     #loading {
+        position: fixed; /* Ensures it overlays the whole screen */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8); /* Light semi-transparent background */
+        display: flex; /* Center content using Flexbox */
+        justify-content: center; /* Center horizontally */
+        align-items: center; /* Center vertically */
+        z-index: 1050; /* Ensure it's on top of other content */
+    }
+</style>
