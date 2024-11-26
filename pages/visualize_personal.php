@@ -126,11 +126,11 @@ try {
 
 
         <!-- Pie Chart View -->
-        <div id="pieChartView" style="display: none;">
+        <div id="pieChartView" class="hidden" style="display: none;">
             <canvas id="pieChart" width="400" height="400"></canvas>
         </div>
 
-        <div id="bubbleChartView" style="display: none">
+        <div id="bubbleChartView" class="hidden" style="display: none">
             <canvas id="bubbleChart" width="400" height="400"></canvas>
         </div>
     </div>
@@ -170,51 +170,51 @@ try {
         let pieChart;
 
         function showView(viewId) {
-            const listView = document.getElementById('listView');
-            const pieChartView = document.getElementById('pieChartView');
-            const bubbleChartView = document.getElementById('bubbleChartView');
-            const listViewButton = document.getElementById('listViewButton');
-            const pieChartViewButton = document.getElementById('pieChartViewButton');
-            const bubbleChartViewButton = document.getElementById('bubbleChartViewButton');
+    const listView = document.getElementById('listView');
+    const pieChartView = document.getElementById('pieChartView');
+    const bubbleChartView = document.getElementById('bubbleChartView');
+    const listViewButton = document.getElementById('listViewButton');
+    const pieChartViewButton = document.getElementById('pieChartViewButton');
+    const bubbleChartViewButton = document.getElementById('bubbleChartViewButton');
 
-            // Update the display of views
-            listView.style.display = viewId === 'listView' ? 'block' : 'none';
-            pieChartView.style.display = viewId === 'pieChartView' ? 'block' : 'none';
-            bubbleChartView.style.display = viewId === 'bubbleChartView' ? 'block' : 'none';
+    listView.classList.add('hidden');
+    pieChartView.classList.add('hidden');
+    bubbleChartView.classList.add('hidden');
 
-            // Update button styles
-            if (viewId === 'listView') {
-                listViewButton.classList.add('btn-primary');
-                listViewButton.classList.remove('btn-secondary');
-                pieChartViewButton.classList.add('btn-secondary');
-                pieChartViewButton.classList.remove('btn-primary');
-                bubbleChartViewButton.classList.add('btn-secondary');
-                bubbleChartViewButton.classList.remove('btn-primary');
-            } else if (viewId === 'pieChartView') {
-                pieChartViewButton.classList.add('btn-primary');
-                pieChartViewButton.classList.remove('btn-secondary');
-                listViewButton.classList.add('btn-secondary');
-                listViewButton.classList.remove('btn-primary');
-                bubbleChartViewButton.classList.add('btn-secondary');
-                bubbleChartViewButton.classList.remove('btn-primary');
-                
-            } else if (viewId === 'bubbleChartView') {
-                pieChartViewButton.classList.add('btn-secondary');
-                pieChartViewButton.classList.remove('btn-primary');
-                listViewButton.classList.add('btn-secondary');
-                listViewButton.classList.remove('btn-primary');
-                bubbleChartViewButton.classList.add('btn-primary');
-                bubbleChartViewButton.classList.remove('btn-secondary');
-            }
+    listViewButton.classList.remove('btn-primary');
+    listViewButton.classList.add('btn-secondary');
+    pieChartViewButton.classList.remove('btn-primary');
+    pieChartViewButton.classList.add('btn-secondary');
+    bubbleChartViewButton.classList.remove('btn-primary');
+    bubbleChartViewButton.classList.add('btn-secondary');
 
-            // Show the pie chart when switching to pieChartView
-            if (viewId === 'pieChartView'){
-                showPieChart();
-            } else if (viewId === 'bubbleChartView'){
-                showBubbleChart();
-            }
-            
-        }
+    if (viewId === 'listView') {
+        bubbleChartView.classList.remove('visible');
+        bubbleChartView.classList.add('hidden');
+        listView.classList.remove('hidden');
+        pieChartView.classList.remove('visible');
+        pieChartView.classList.add('hidden');
+        listViewButton.classList.add('btn-primary');
+        listViewButton.classList.remove('btn-secondary');
+    } else if (viewId === 'pieChartView') {
+        bubbleChartView.classList.remove('visible');
+        bubbleChartView.classList.add('hidden');
+        pieChartView.classList.remove('hidden');
+        pieChartViewButton.classList.add('btn-primary');
+        pieChartView.classList.add('visible');
+        pieChartViewButton.classList.remove('btn-secondary');
+        showPieChart();
+    } else if (viewId === 'bubbleChartView') {
+        pieChartView.classList.remove('visible');
+        pieChartView.classList.add('hidden');
+        bubbleChartView.classList.remove('hidden');
+        bubbleChartView.classList.add('visible');
+        bubbleChartViewButton.classList.add('btn-primary');
+        bubbleChartViewButton.classList.remove('btn-secondary');
+        showBubbleChart();
+    }
+}
+
 
 
         function showBubbleChart() {
@@ -367,6 +367,14 @@ try {
             background-color: #f8f9fa;
             cursor: pointer;
         }
+        .hidden {
+            display: none !important;
+        }
+
+        .visible {
+            display: block !important;
+        }
+
     </style>
 </body>
 </html>
