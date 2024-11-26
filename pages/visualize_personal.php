@@ -156,13 +156,9 @@ try {
             </div>
         </div>
     </div>
-<!-- Include Chart.js version 3.9.1 -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-<!-- Include date-fns version 2.29.3 -->
-<script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3"></script>
-<!-- Include the Chart.js date adapter for date-fns version 2.4.0 -->
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.4.0"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
 <!-- Include jQuery and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <!-- Bootstrap JS Bundle includes Popper.js -->
