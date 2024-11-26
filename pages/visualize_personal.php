@@ -67,9 +67,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Tasks</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+   
 </head>
 <body>
     <div class="container mt-5">
@@ -158,6 +156,17 @@ try {
             </div>
         </div>
     </div>
+<!-- Include Chart.js version 3.9.1 -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<!-- Include date-fns version 2.29.3 -->
+<script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3"></script>
+<!-- Include the Chart.js date adapter for date-fns version 2.4.0 -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.4.0"></script>
+
+<!-- Include jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<!-- Bootstrap JS Bundle includes Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 
     <script>
@@ -167,12 +176,15 @@ try {
         function showView(viewId) {
             const listView = document.getElementById('listView');
             const pieChartView = document.getElementById('pieChartView');
+            const bubbleChartView = document.getElementById('bubbleChartView');
             const listViewButton = document.getElementById('listViewButton');
             const pieChartViewButton = document.getElementById('pieChartViewButton');
+            const bubbleChartViewButton = document.getElementById('bubbleChartViewButton');
 
             // Update the display of views
             listView.style.display = viewId === 'listView' ? 'block' : 'none';
             pieChartView.style.display = viewId === 'pieChartView' ? 'block' : 'none';
+            bubbleChartView.style.display = viewId === 'bubbleChartView' ? 'block' : 'none';
 
             // Update button styles
             if (viewId === 'listView') {
@@ -180,16 +192,112 @@ try {
                 listViewButton.classList.remove('btn-secondary');
                 pieChartViewButton.classList.add('btn-secondary');
                 pieChartViewButton.classList.remove('btn-primary');
+                bubbleChartViewButton.classList.add('btn-secondary');
+                bubbleChartViewButton.classList.remove('btn-primary');
             } else if (viewId === 'pieChartView') {
                 pieChartViewButton.classList.add('btn-primary');
                 pieChartViewButton.classList.remove('btn-secondary');
                 listViewButton.classList.add('btn-secondary');
                 listViewButton.classList.remove('btn-primary');
+                bubbleChartViewButton.classList.add('btn-secondary');
+                bubbleChartViewButton.classList.remove('btn-primary');
+                
+            } else if (viewId === 'bubbleChartView') {
+                pieChartViewButton.classList.add('btn-secondary');
+                pieChartViewButton.classList.remove('btn-primary');
+                listViewButton.classList.add('btn-secondary');
+                listViewButton.classList.remove('btn-primary');
+                bubbleChartViewButton.classList.add('btn-primary');
+                bubbleChartViewButton.classList.remove('btn-secondary');
             }
 
             // Show the pie chart when switching to pieChartView
-            if (viewId === 'pieChartView') showPieChart();
+            if (viewId === 'pieChartView'){
+                showPieChart();
+            } else if (viewId === 'bubbleChartView'){
+                showBubbleChart();
+            }
+            
         }
+
+
+        function showBubbleChart() {
+    const ctx = document.getElementById('bubbleChart').getContext('2d');
+
+    // Map the tasks data to the bubble chart data format
+    const bubbleDataPoints = tasks.map(task => {
+        // Convert due_date to a Date object or a string in ISO format
+        const dueDate = new Date(task.due_date);
+        if (isNaN(dueDate)) {
+            console.error(`Invalid date for task "${task.title}": ${task.due_date}`);
+            return null; // Exclude invalid data points
+        }
+
+        return {
+            x: dueDate, // Use the Date object directly
+            y: Number(task.estimated_load),
+            r: Number(task.estimated_load) * 2, // Adjust as needed
+            taskTitle: task.title,
+        };
+    }).filter(dataPoint => dataPoint !== null); // Remove any null entries due to invalid dates
+
+    // Log the data to verify the structure
+    console.log('Bubble Data Points:', bubbleDataPoints);
+
+    const bubbleData = {
+        datasets: [{
+            label: 'Personal Tasks',
+            data: bubbleDataPoints,
+            backgroundColor: '#36A2EB'
+        }]
+    };
+
+    // Destroy previous chart instance if it exists
+    if (bubbleChart && typeof bubbleChart.destroy === 'function') {
+        bubbleChart.destroy();
+    }
+
+    try {
+        bubbleChart = new Chart(ctx, {
+            type: 'bubble',
+            data: bubbleData,
+            options: {
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'day',
+                            tooltipFormat: 'MMM d, yyyy',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Due Date',
+                        },
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Estimated Load',
+                        },
+                    },
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const dataPoint = context.raw;
+                                return `${dataPoint.taskTitle}: Load ${dataPoint.y}`;
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    } catch (error) {
+        console.error('Error creating bubbleChart:', error);
+    }
+}
+
 
 
         function showTaskDetails(task) {
