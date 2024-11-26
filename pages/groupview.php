@@ -106,19 +106,18 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
 
 
     <!-- List View -->
-    <div id="listView" class="d-flex flex-column gap-3">
+    <div id="listView" class="d-flex flex-column gap-3 overflow-auto" style="max-height: 80vh;">
         <div id="taskItems">
             <?php if (!empty($tasks)): ?>
                 <?php foreach ($tasks as $task): ?>
-                    <div class="task-item d-flex justify-content-between align-items-center p-3 border rounded"
-                        onclick="showTaskDetails(<?php echo json_encode($task, ENT_QUOTES) ?>)">
+                    <div class="task-item p-3 border rounded"
+                        style="word-wrap: break-word; overflow-wrap: anywhere;"
+                        onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task, ENT_QUOTES)); ?>)">
                         <div class="task-info">
-                            <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
+                            <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
                             <p class="mb-1 text-muted">Group: <?php echo htmlspecialchars($task['group_name']); ?></p>
-                            <small class="text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></small>
-                        </div>
-                        <div class="task-load text-end">
-                            <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
+                            <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                            <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -127,6 +126,8 @@ $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
             <?php endif; ?>
         </div>
     </div>
+
+
 
     <!-- Modal for Task Details OPENS OVERLAY DETAILS-->
     <div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">

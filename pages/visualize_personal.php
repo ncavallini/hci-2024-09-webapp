@@ -98,14 +98,15 @@ try {
         </div>
 
         <!-- List View -->
-        <div id="listView" class="d-flex flex-column gap-3">
+        <div id="listView" class="d-flex flex-column gap-3 overflow-auto" style="max-height: 80vh;">
             <?php if (!empty($tasks)): ?>
                 <?php foreach ($tasks as $task): ?>
                     <div 
-                        class="task-item d-flex justify-content-between align-items-center p-3 border rounded"
+                        class="task-item d-flex justify-content-between align-items-center p-3 border rounded flex-wrap"
+                        style="word-wrap: break-word; overflow-wrap: anywhere;"
                         onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
 
-                        <div>
+                        <div class="flex-grow-1 me-3">
                             <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
                             <p class="mb-1 text-muted"><?php echo htmlspecialchars($task['description']); ?></p>
                             <small class="text-muted">
@@ -113,8 +114,7 @@ try {
                             </small>
                         </div>
                         <div>
-                            <span class="badge badge-primary badge-pill">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
-                            
+                            <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -122,6 +122,7 @@ try {
                 <p class="lead text-muted">No personal tasks found.</p>
             <?php endif; ?>
         </div>
+
 
         <!-- Pie Chart View -->
         <div id="pieChartView" style="display: none;">
