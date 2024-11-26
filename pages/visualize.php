@@ -167,6 +167,7 @@ try {
         <div class="d-flex flex-wrap gap-2">
             <button id="listViewButton" class="btn btn-primary" onclick="showView('listView')">List View</button>
             <button id="pieChartViewButton" class="btn btn-secondary" onclick="showView('pieChartView')">Pie Chart View</button>
+            <button id="bubbleChartViewButton" class="btn btn-secondary" onclick="showView('bubbleChartView')">Bubble Chart View</button>
         </div>
     </div>
 
