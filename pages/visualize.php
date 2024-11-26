@@ -239,6 +239,11 @@ try {
     <div id="pieChartView" style="display: none;">
         <canvas id="pieChart" width="400" height="400"></canvas>
     </div>
+
+    <!-- Bubble Chart View -->
+    <div id="bubbleChartView" style="display: none;">
+        <canvas id="bubbleChart" width="400" height="400"></canvas>
+    </div>
 </div>
 
 
