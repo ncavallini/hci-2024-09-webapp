@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once __DIR__ . "/../utils/init.php";
 
 // Ensure the user is logged in
@@ -10,9 +10,7 @@ if (!Auth::is_logged_in()) {
 try {
     $dbconnection = DBConnection::get_connection();
     $user_id = Auth::user()['user_id']; // Get the logged-in user's ID
-
-    // Get group_id from the URL
-    $group_id = isset($_GET['id']) ? intval($_GET['id']) : 0; // Default to 0 for personal tasks
+    $group_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
     // Fetch tasks for the specified group_id
     $sql = "
@@ -35,21 +33,31 @@ try {
             t.is_completed ASC, at.due_date ASC";
     $stmt = $dbconnection->prepare($sql);
     $stmt->execute([$group_id, $user_id]);
-
     $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Calculate total mental load for these tasks
-    $total_load = array_sum(array_map(function ($task) {
-        return !$task['is_completed'] ? $task['estimated_load'] : 0;
-    }, $tasks));
+    // Separate overdue and non-overdue tasks
+    $now = new DateTime();
+    $overdueTasks = [];
+    $nonOverdueTasks = [];
+    foreach ($tasks as $task) {
+        $dueDate = new DateTime($task['due_date']);
+        if ($dueDate < $now) {
+            $overdueTasks[] = $task;
+        } else {
+            $nonOverdueTasks[] = $task;
+        }
+    }
+
+    // Calculate total mental load for all tasks
+    $total_load = array_sum(array_column($tasks, 'estimated_load'));
 
     // Fetch and update maximum load for the user
     $sql = "SELECT max_load FROM users WHERE user_id = ?";
     $stmt = $dbconnection->prepare($sql);
     $stmt->execute([$user_id]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
     $max_load = $row['max_load'] ?? 0;
+
     if ($total_load > $max_load) {
         $max_load = $total_load;
         $sql = "UPDATE users SET max_load = ? WHERE user_id = ?";
@@ -62,6 +70,7 @@ try {
     die("Error fetching tasks: " . $e->getMessage());
 }
 ?>
+
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -105,29 +114,33 @@ try {
 
         <!-- List View -->
         <div id="listView" class="d-flex flex-column gap-3 overflow-auto" style="max-height: 80vh;">
-            <?php if (!empty($tasks)): ?>
-                <?php foreach ($tasks as $task): ?>
-                    <div 
-                        class="task-item d-flex justify-content-between align-items-center p-3 border rounded flex-wrap"
-                        style="word-wrap: break-word; overflow-wrap: anywhere;"
-                        onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
+    <h3>Non-Overdue Tasks</h3>
+    <?php if (!empty($nonOverdueTasks)): ?>
+        <?php foreach ($nonOverdueTasks as $task): ?>
+            <div class="task-item p-3 border rounded" onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
+                <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
+                <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p class="lead text-muted">No non-overdue tasks found.</p>
+    <?php endif; ?>
 
-                        <div class="flex-grow-1 me-3">
-                            <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
-                            <p class="mb-1 text-muted"><?php echo htmlspecialchars($task['description']); ?></p>
-                            <small class="text-muted">
-                                <strong>Due: </strong> <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?>
-                            </small>
-                        </div>
-                        <div>
-                            <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="lead text-muted">No personal tasks found.</p>
-            <?php endif; ?>
-        </div>
+    <h3 class="mt-4">Overdue Tasks</h3>
+    <?php if (!empty($overdueTasks)): ?>
+        <?php foreach ($overdueTasks as $task): ?>
+            <div class="task-item p-3 border rounded" style="background-color: lightcoral;" onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
+                <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
+                <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p class="lead text-muted">No overdue tasks found.</p>
+    <?php endif; ?>
+</div>
+
 
 
         <!-- Pie Chart View -->

@@ -4,64 +4,86 @@ try {
     $dbconnection = DBConnection::get_connection();
 
     // Fetch personal tasks
-        $sql = "SELECT title, description, due_date, estimated_load, 'Personal' AS group_name, 0 as group_id, is_completed 
-                FROM tasks 
-                WHERE user_id = ? and is_completed = 0
-                ORDER BY is_completed ASC, estimated_load DESC, due_date ASC";
-        $stmt = $dbconnection->prepare($sql);
-        $stmt->execute([$user_id]);
-        $personalTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT title, description, due_date, estimated_load, 'Personal' AS group_name, 0 as group_id, is_completed 
+            FROM tasks 
+            WHERE user_id = ? and is_completed = 0
+            ORDER BY is_completed ASC, estimated_load DESC, due_date ASC";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $personalTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Fetch group tasks
-        $sql = "SELECT 
-                    gt.title, 
-                    gt.description, 
-                    gt.due_date, 
-                    gt.estimated_load, 
-                    g.name AS group_name, 
-                    g.group_id,
-                    gt.is_completed 
-                FROM 
-                    group_tasks gt
-                JOIN 
-                    groups g ON gt.group_id = g.group_id
-                WHERE 
-                    gt.user_id = ? and is_completed = 0
-                ORDER BY 
-                    gt.is_completed ASC, gt.estimated_load DESC, gt.due_date ASC";
-        $stmt = $dbconnection->prepare($sql);
-        $stmt->execute([$user_id]);
-        $groupTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch group tasks
+    $sql = "SELECT 
+                gt.title, 
+                gt.description, 
+                gt.due_date, 
+                gt.estimated_load, 
+                g.name AS group_name, 
+                g.group_id,
+                gt.is_completed 
+            FROM 
+                group_tasks gt
+            JOIN 
+                groups g ON gt.group_id = g.group_id
+            WHERE 
+                gt.user_id = ? and is_completed = 0
+            ORDER BY 
+                gt.is_completed ASC, gt.estimated_load DESC, gt.due_date ASC";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $groupTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Merge tasks
-        $tasks = array_merge($personalTasks, $groupTasks);
-
-        // Calculate total mental load
-        $total_load = array_sum(array_map(function ($task) {
-            return !$task['is_completed'] ? $task['estimated_load'] : 0;
-        }, $tasks));
-
-        // Fetch and update maximum load
-        $sql = "SELECT max_load FROM users WHERE user_id = ?";
-        $stmt = $dbconnection->prepare($sql);
-        $stmt->execute([$user_id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        $max_load = $row['max_load'] ?? 0;
-        if ($total_load > $max_load) {
-            $max_load = $total_load;
-            $sql = "UPDATE users SET max_load = ? WHERE user_id = ?";
-            $stmt = $dbconnection->prepare($sql);
-            $stmt->execute([$max_load, $user_id]);
+    // Categorize overdue tasks
+    $now = time();
+    $overdueTasks = [];
+    $filterTasks = function (&$tasks) use (&$overdueTasks, $now) {
+        $filtered = [];
+        foreach ($tasks as $task) {
+            if (strtotime($task['due_date']) < $now) {
+                $overdueTasks[] = $task;
+            } else {
+                $filtered[] = $task;
+            }
         }
+        return $filtered;
+    };
+    $tasks = array_merge($personalTasks, $groupTasks);
 
-        $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
+    $personalTasks = $filterTasks($personalTasks);
+    $groupTasks = $filterTasks($groupTasks);
 
-    } catch (Exception $e) {
-        $tasks = [];
-        $error = $e->getMessage();
+    // Merge tasks
+
+    // Calculate total mental load
+    $total_load = array_sum(array_map(function ($task) {
+        return !$task['is_completed'] ? $task['estimated_load'] : 0;
+    }, $tasks));
+
+    // Fetch and update maximum load
+    $sql = "SELECT max_load FROM users WHERE user_id = ?";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$user_id]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $max_load = $row['max_load'] ?? 0;
+    if ($total_load > $max_load) {
+        $max_load = $total_load;
+        $sql = "UPDATE users SET max_load = ? WHERE user_id = ?";
+        $stmt = $dbconnection->prepare($sql);
+        $stmt->execute([$max_load, $user_id]);
     }
+
+    $load_percentage = ($max_load > 0) ? ($total_load / $max_load) * 100 : 0;
+
+} catch (Exception $e) {
+    $tasks = [];
+    $overdueTasks = [];
+    $error = $e->getMessage();
+}
 ?>
+
+
+
 
 
 
@@ -111,58 +133,105 @@ try {
 
     <!-- List View -->
     <div id="listView" class="d-flex flex-column gap-3 overflow-auto" style="max-height: 80vh;">
-        <h3>Personal Tasks</h3>
-        <div id="personalTasks">
-            <?php if (!empty($personalTasks)): ?>
-                <?php foreach ($personalTasks as $task): ?>
-                    <div class="task-item p-3 border rounded"
-                        style="word-wrap: break-word; overflow-wrap: anywhere;"
-                        onclick="showTaskDetails(<?php echo json_encode($task, ENT_QUOTES); ?>)">
-                        <div class="task-info">
-                            <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
-                            <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
-                            <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
-                        </div>
+    <h3>Personal Tasks</h3>
+    <div id="personalTasks">
+        <?php if (!empty($personalTasks)): ?>
+            <?php foreach ($personalTasks as $task): ?>
+                <div class="task-item p-3 border rounded"
+                    style="word-wrap: break-word; overflow-wrap: anywhere; cursor: pointer;"
+                    onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
+                    <div class="task-info">
+                        <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
+                        <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                        <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
                     </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="lead text-center text-muted">No personal tasks found.</p>
-            <?php endif; ?>
-        </div>
-
-        <h3 class="mt-4">Group Tasks</h3>
-        <div id="groupTasks">
-            <?php if (!empty($groupTasks)): ?>
-                <?php foreach ($groupTasks as $task): ?>
-                    <div class="task-item p-3 border rounded"
-                        style="word-wrap: break-word; overflow-wrap: anywhere;"
-                        onclick="showTaskDetails(<?php echo json_encode($task, ENT_QUOTES); ?>)">
-                        <div class="task-info">
-                            <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
-                            <p class="mb-1 text-muted">Group: <?php echo htmlspecialchars($task['group_name']); ?></p>
-                            <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
-                            <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <p class="lead text-center text-muted">No group tasks found.</p>
-            <?php endif; ?>
-        </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="lead text-center text-muted">No personal tasks found.</p>
+        <?php endif; ?>
     </div>
 
-    <!-- Pie Chart View -->
-    <div id="pieChartView" style="display: none;">
-        <canvas id="pieChart" width="400" height="400"></canvas>
+    <h3 class="mt-4">Group Tasks</h3>
+    <div id="groupTasks">
+        <?php if (!empty($groupTasks)): ?>
+            <?php foreach ($groupTasks as $task): ?>
+                <div class="task-item p-3 border rounded"
+                    style="word-wrap: break-word; overflow-wrap: anywhere; cursor: pointer;"
+                    onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
+                    <div class="task-info">
+                        <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
+                        <p class="mb-1 text-muted">Group: <?php echo htmlspecialchars($task['group_name']); ?></p>
+                        <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                        <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="lead text-center text-muted">No group tasks found.</p>
+        <?php endif; ?>
     </div>
 
-    <!-- Bubble Chart View -->
-    <div id="bubbleChartView" style="display: none;">
-        <canvas id="bubbleChart" width="400" height="400"></canvas>
+    <!-- Overdue Tasks Section -->
+    <h3 class="mt-4">Overdue Tasks</h3>
+    <div id="overdueTasks">
+        <?php if (!empty($overdueTasks)): ?>
+            <?php foreach ($overdueTasks as $task): ?>
+                <div class="task-item p-3 border rounded" style="background-color: lightcoral; cursor: pointer;"
+                    onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
+                    <div class="task-info">
+                        <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
+                        <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                        <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <p class="lead text-center text-muted">No overdue tasks found.</p>
+        <?php endif; ?>
     </div>
 </div>
 
+
+
+                <!-- Pie Chart View -->
+                <div id="pieChartView" style="display: none;">
+                    <canvas id="pieChart" width="400" height="400"></canvas>
+                </div>
+            
+                <!-- Bubble Chart View -->
+                <div id="bubbleChartView" style="display: none;">
+                    <canvas id="bubbleChart" width="400" height="400"></canvas>
+                </div>
+
+
+                <!-- Task Details Modal -->
+                <div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="taskDetailsModalLabel">Task Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Title:</strong> <span id="taskTitle"></span></p>
+                    <p><strong>Description:</strong> <span id="taskDescription"></span></p>
+                    <p><strong>Location:</strong> <span id="taskLocation"></span></p>
+                    <p><strong>Due Date:</strong> <span id="taskDueDate"></span></p>
+                    <p><strong>Estimated Load:</strong> <span id="taskEstimatedLoad"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+</div>
+
 <script>
+
      function showBubbleChart(mode) {
         currentMode = mode;
         const tasks = <?php echo json_encode($tasks); ?>;
@@ -327,6 +396,7 @@ try {
         let bubbleChart;
 
         
+        
         function showView(viewId) {
             const listView = document.getElementById('listView');
             const pieChartView = document.getElementById('pieChartView');
@@ -367,6 +437,12 @@ try {
                 bubbleChartView.classList.add('visible');
                 showBubbleChart(currentMode);
             }
+
+            document.getElementById('taskListButton').addEventListener('click', () => toggleTaskGroup('tasks'));
+            document.getElementById('groupListButton').addEventListener('click', () => toggleTaskGroup('groups'));
+            document.getElementById('listViewButton').addEventListener('click', () => showView('listView'));
+            document.getElementById('pieChartViewButton').addEventListener('click', () => showView('pieChartView'));
+            document.getElementById('bubbleChartViewButton').addEventListener('click', () => showView('bubbleChartView'));
         }
 
 
@@ -390,8 +466,8 @@ try {
 
                     const taskDiv = document.createElement("div");
                     taskDiv.className = "task-item d-flex justify-content-between align-items-center p-3 border rounded";
-                    taskDiv.style.backgroundColor = isOverdue ? "lightcoral" : "";
-                    taskDiv.onclick = () => showTaskDetails(JSON.stringify(task));
+                    taskDiv.style.backgroundColor = isOverdue ? "lightcoral" : "black";
+                    
                     taskDiv.innerHTML = `
                         <div class="task-info">
                             <h5 class="${isCompleted ? 'text-primary' : ''} mb-1">
@@ -449,15 +525,14 @@ try {
 
 
 
-    function showTaskDetails(taskJson) {
-        const task = JSON.parse(taskJson);
-        document.getElementById('taskTitle').textContent = task.title;
-        document.getElementById('taskDescription').textContent = task.description;
-        document.getElementById('taskDueDate').textContent = new Date(task.due_date).toLocaleString();
-        document.getElementById('taskEstimatedLoad').textContent = task.estimated_load;
-        document.getElementById('taskGroupName').textContent = task.group_name;
-        new bootstrap.Modal(document.getElementById('taskDetailsModal')).show();
-    }
+    function showTaskDetails(task) {
+            document.getElementById('taskTitle').textContent = task.title;
+            document.getElementById('taskDescription').textContent = task.description;
+            document.getElementById('taskLocation').textContent = task.location;
+            document.getElementById('taskDueDate').textContent = new Date(task.due_date).toLocaleString();
+            document.getElementById('taskEstimatedLoad').textContent = task.estimated_load;
+            new bootstrap.Modal(document.getElementById('taskDetailsModal')).show();
+        }
 
     function showPieChart(mode) {
     currentMode = mode; // Remember the current mode
@@ -531,27 +606,33 @@ try {
 
 
 
-    function updateProgressBar(loadPercentage) {
-        const progressBar = document.querySelector(".progress-bar");
+function updateProgressBar(loadPercentage) {
+    const loadProgressBar = document.querySelector("#loadProgressBar");
 
-        if (!progressBar) {
-            console.error("Progress bar element not found!");
-            return;
-        }
-
-        // Set the progress bar width and aria attributes
-        progressBar.style.width = `${loadPercentage}%`;
-        progressBar.setAttribute("aria-valuenow", loadPercentage);
-
-        // Change the progress bar's background color based on the percentage
-        if (loadPercentage >= 80) {
-            progressBar.style.backgroundColor = "darkred"; // High load
-        } else if (loadPercentage >= 50) {
-            progressBar.style.backgroundColor = "orange"; // Moderate load
-        } else {
-            progressBar.style.backgroundColor = "lightgreen"; // Low load
-        }
+    if (!loadProgressBar) {
+        console.error("Progress bar element not found!");
+        return;
     }
+
+    // Set the progress bar width and aria attributes
+    loadProgressBar.style.width = `${loadPercentage}%`;
+    loadProgressBar.setAttribute("aria-valuenow", loadPercentage);
+
+    // Change the progress bar's background color based on the percentage
+    if (loadPercentage >= 80) {
+        loadProgressBar.style.backgroundColor = "darkred";
+    } else if (loadPercentage >= 50) {
+        loadProgressBar.style.backgroundColor = "orange";
+    } else {
+        loadProgressBar.style.backgroundColor = "lightgreen";
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const loadPercentage = <?php echo $load_percentage; ?>;
+    updateProgressBar(loadPercentage);
+});
+
 
     function highlightOverdueTasks() {
         const taskItems = document.querySelectorAll(".task-item");
@@ -591,38 +672,40 @@ try {
         // Call the updateProgressBar function with the initial load percentage
         updateProgressBar(loadPercentage);
 
-        if (progressBar) {
-            progressBar.addEventListener("click", () => {
-                window.location.href = "index.php?page=pastLoad";
-            });
-        }
-        // Event listeners for switching between views
-        document.getElementById('listViewButton').addEventListener('click', () => showView('listView'));
-        document.getElementById('pieChartViewButton').addEventListener('click', () => showView('pieChartView'));
-
-        // Event listeners for toggling tasks and groups in List View
-        document.getElementById('taskListButton').addEventListener('click', () => {
-            console.log("Switching to Task View in List Chart");
-            showListView('tasks')
-        });
-        document.getElementById('groupListButton').addEventListener('click', () => showListView('groups'));
-
-        // Event listeners for toggling tasks and groups in Pie Chart View
-        document.getElementById('taskListButton').addEventListener('click', () => {
-            showListView('tasks');
-            showPieChart('tasks');
-            showBubbleChart('tasks');
-        });
-        document.getElementById('groupListButton').addEventListener('click', () => {
-            showListView('groups');
-            showPieChart('groups');
-            showBubbleChart('groups');
-        });
-
+        
         document.addEventListener('DOMContentLoaded', () => {
-            showView('listView');
-            showListView('tasks');
-        });
+    // Initialize default view and mode
+    showView('listView');
+    showListView('tasks');
+
+    // Event listeners for switching between views
+    document.getElementById('listViewButton').addEventListener('click', () => showView('listView'));
+    document.getElementById('pieChartViewButton').addEventListener('click', () => showView('pieChartView'));
+    document.getElementById('bubbleChartViewButton').addEventListener('click', () => showView('bubbleChartView'));
+
+    // Event listeners for toggling tasks and groups
+    document.getElementById('taskListButton').addEventListener('click', () => {
+        console.log("Switching to Task View");
+        toggleTaskGroup('tasks');
+    });
+
+    document.getElementById('groupListButton').addEventListener('click', () => {
+        console.log("Switching to Group View");
+        toggleTaskGroup('groups');
+    });
+});
+
+function toggleTaskGroup(mode) {
+    currentMode = mode;
+
+    if (currentView === 'listView') {
+        showListView(mode);
+    } else if (currentView === 'pieChartView') {
+        showPieChart(mode);
+    } else if (currentView === 'bubbleChartView') {
+        showBubbleChart(mode);
+    }
+}
 
         highlightOverdueTasks();
     });
