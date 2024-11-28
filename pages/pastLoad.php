@@ -9,29 +9,40 @@ if (!Auth::is_logged_in()) {
 
 $user_id = Auth::user()['user_id'];
 
-// Query to fetch mental load and related task data
+// Query to fetch tasks and group tasks
 $sql = "
     SELECT 
-        generated_dates.load_date,
-        gt.title AS task_title, 
-        g.name AS group_name,
-        gt.estimated_load 
-    FROM 
-        (
-            SELECT 
-                CURDATE() - INTERVAL seq.seq DAY AS load_date
-            FROM 
-                (SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) seq
-        ) generated_dates
-    JOIN 
-        group_tasks gt ON DATE(gt.created_at) <= generated_dates.load_date
-        AND (gt.completed_at IS NULL OR DATE(gt.completed_at) > generated_dates.load_date)
-    JOIN 
-        groups g ON gt.group_id = g.group_id
-    WHERE 
-        gt.user_id = :user_id
-    ORDER BY 
-        generated_dates.load_date ASC";
+    DATE(t.created_at) AS load_date,
+    t.title AS task_title,
+    NULL AS group_name, -- Personal tasks have no group name
+    t.estimated_load
+FROM 
+    tasks t
+WHERE 
+    t.user_id = :user_id
+    AND (t.completed_at IS NULL OR DATE(t.completed_at) > CURDATE())
+    AND DATE(t.created_at) <= CURDATE()
+
+UNION ALL
+
+SELECT 
+    DATE(gt.created_at) AS load_date,
+    gt.title AS task_title,
+    g.name AS group_name, -- Group tasks include group name
+    gt.estimated_load
+FROM 
+    group_tasks gt
+LEFT JOIN 
+    groups g ON gt.group_id = g.group_id
+WHERE 
+    gt.user_id = :user_id
+    AND (gt.completed_at IS NULL OR DATE(gt.completed_at) > CURDATE())
+    AND DATE(gt.created_at) <= CURDATE()
+ORDER BY 
+    load_date ASC;
+
+
+";
 
 $stmt = $dbconnection->prepare($sql);
 $stmt->execute(['user_id' => $user_id]);
@@ -46,7 +57,7 @@ foreach ($load_data as $row) {
     }
     $groupedData[$date]['total_load'] += $row['estimated_load'];
 
-    $groupName = $row['group_name'];
+    $groupName = $row['group_name'] ?? 'Personal'; // Default to 'Personal' if no group name
     if (!isset($groupedData[$date]['groups'][$groupName])) {
         $groupedData[$date]['groups'][$groupName] = [];
     }
@@ -63,14 +74,17 @@ $taskDetails = json_encode($groupedData); // Task details grouped by date
 ?>
 
 
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mental Load Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-
+</head>
+<body>
     <h1>Total Mental Load Over the Past 7 Days</h1>
     <div class="container mt-4">
         <canvas id="lineChart" width="400" height="200"></canvas>
@@ -199,7 +213,6 @@ $taskDetails = json_encode($groupedData); // Task details grouped by date
                         new bootstrap.Modal(document.getElementById("taskDetailsModal")).show();
                     }
                 }
-
             }
         };
 
@@ -207,3 +220,5 @@ $taskDetails = json_encode($groupedData); // Task details grouped by date
         new Chart(ctx, config);
     });
     </script>
+</body>
+</html>
