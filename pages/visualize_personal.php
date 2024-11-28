@@ -60,36 +60,38 @@ try {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Tasks</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
    
-</head>
-<body>
     <div class="container mt-5">
         <h1 class="mb-4">Personal Tasks</h1>
 
         <!-- Mental Load Bar -->
-        <div class="mb-4">
-            <h5>Mental Load from Personal tasks</h5>
-            <div class="progress">
-                <div 
-                    class="progress-bar" 
-                    id="loadProgressBar" 
-                    role="progressbar" 
-                    style="width: <?php echo $load_percentage; ?>%;" 
-                    aria-valuenow="<?php echo $total_load; ?>" 
-                    aria-valuemin="0" 
-                    aria-valuemax="<?php echo $max_load; ?>">
-                    <?php echo round($load_percentage); ?>%
-                </div>
+        <div class="mb-4 position-relative">
+        <h5>Your Mental Load
+            <a class= "nav-link" href="index.php?page=pastLoad"> 
+                <button 
+                    class="btn btn-info position-absolute top-0 end-0" >
+                    Past Mental Load
+                </button>
+            </a>
+        </h5>
+        <div class="progress mt-3">
+            <div 
+                class="progress-bar" 
+                id="loadProgressBar" 
+                role="progressbar" 
+                style="width: <?php echo $load_percentage; ?>%;" 
+                aria-valuenow="<?php echo $total_load; ?>" 
+                aria-valuemin="0" 
+                aria-valuemax="<?php echo $max_load; ?>">
+                <?php echo round($load_percentage); ?>%
             </div>
-            <p class="mt-2">Personal Tasks Load: <?php echo $total_load; ?> / Maximum Load: <?php echo $max_load; ?></p>
         </div>
+        <p class="mt-2">Current Load: <?php echo $total_load; ?> / Maximum Load: <?php echo $max_load; ?></p>
+    </div>
 
         <!-- Buttons for List and Pie Chart Views -->
         <div class="d-flex justify-content-between mb-3">
@@ -376,5 +378,3 @@ try {
         }
 
     </style>
-</body>
-</html>
