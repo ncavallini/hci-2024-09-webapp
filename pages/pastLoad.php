@@ -12,34 +12,45 @@ $user_id = Auth::user()['user_id'];
 // Query to fetch tasks and group tasks
 $sql = "
     SELECT 
-    DATE(t.created_at) AS load_date,
+    generated_dates.load_date,
     t.title AS task_title,
     NULL AS group_name, -- Personal tasks have no group name
     t.estimated_load
 FROM 
-    tasks t
-WHERE 
-    t.user_id = :user_id
-    AND (t.completed_at IS NULL OR DATE(t.completed_at) > CURDATE())
-    AND DATE(t.created_at) <= CURDATE()
+    (
+        SELECT 
+            CURDATE() - INTERVAL seq.seq DAY AS load_date
+        FROM 
+            (SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) seq
+    ) generated_dates
+LEFT JOIN 
+    tasks t ON DATE(t.created_at) <= generated_dates.load_date
+    AND (t.completed_at IS NULL OR DATE(t.completed_at) > generated_dates.load_date) -- Include incomplete tasks
+    AND t.user_id = :user_id
 
 UNION ALL
 
 SELECT 
-    DATE(gt.created_at) AS load_date,
+    generated_dates.load_date,
     gt.title AS task_title,
     g.name AS group_name, -- Group tasks include group name
     gt.estimated_load
 FROM 
-    group_tasks gt
+    (
+        SELECT 
+            CURDATE() - INTERVAL seq.seq DAY AS load_date
+        FROM 
+            (SELECT 0 AS seq UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6) seq
+    ) generated_dates
 LEFT JOIN 
+    group_tasks gt ON DATE(gt.created_at) <= generated_dates.load_date
+    AND (gt.completed_at IS NULL OR DATE(gt.completed_at) > generated_dates.load_date) -- Include incomplete group tasks
+    AND gt.user_id = :user_id
+JOIN 
     groups g ON gt.group_id = g.group_id
-WHERE 
-    gt.user_id = :user_id
-    AND (gt.completed_at IS NULL OR DATE(gt.completed_at) > CURDATE())
-    AND DATE(gt.created_at) <= CURDATE()
 ORDER BY 
     load_date ASC;
+
 
 
 ";
