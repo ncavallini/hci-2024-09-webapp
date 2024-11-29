@@ -12,6 +12,15 @@ try {
     $user_id = Auth::user()['user_id']; // Get the logged-in user's ID
     $group_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 
+    // Fetch group name
+    // Fetch group name based only on group_id
+    $sql = "SELECT name FROM groups WHERE group_id = ?";
+    $stmt = $dbconnection->prepare($sql);
+    $stmt->execute([$group_id]);
+    $groupRow = $stmt->fetch(PDO::FETCH_ASSOC);
+    $group = $groupRow['name'] ?? "Unknown Group"; // Fallback if group is not found
+
+
     // Fetch tasks for the specified group_id
     $sql = "
         SELECT 
@@ -72,17 +81,17 @@ try {
 ?>
 
 
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Tasks</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
    
     <div class="container mt-5">
-        <h1 class="mb-4">Personal Tasks</h1>
+        <h1 class="mb-4"><?php echo htmlspecialchars($group); ?>'s Tasks</h1>
 
         <!-- Mental Load Bar -->
         <div class="mb-4 position-relative">
-        <h5>Your Mental Load
+        <h5><?php echo htmlspecialchars($group); ?>'s Mental Load
             <a class= "nav-link" href="index.php?page=pastLoad"> 
                 <button 
                     class="btn btn-info position-absolute top-0 end-0" >
@@ -120,7 +129,7 @@ try {
             <div class="task-item p-3 border rounded" onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
                 <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
                 <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
-                <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+                <p class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
             </div>
         <?php endforeach; ?>
     <?php else: ?>
@@ -133,7 +142,7 @@ try {
             <div class="task-item p-3 border rounded" style="background-color: lightcoral;" onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
                 <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
                 <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
-                <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+                <p class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
             </div>
         <?php endforeach; ?>
     <?php else: ?>

@@ -85,17 +85,14 @@ $taskDetails = json_encode($groupedData); // Task details grouped by date
 ?>
 
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mental Load Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-</head>
-<body>
+
     <h1>Total Mental Load Over the Past 7 Days</h1>
     <div class="container mt-4">
         <canvas id="lineChart" width="400" height="200"></canvas>
@@ -231,5 +228,4 @@ $taskDetails = json_encode($groupedData); // Task details grouped by date
         new Chart(ctx, config);
     });
     </script>
-</body>
-</html>
+
