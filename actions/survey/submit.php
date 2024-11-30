@@ -47,19 +47,19 @@
         $sql = "SELECT is_completed FROM group_tasks WHERE group_task_id = ?";
         $stmt = $connection->prepare($sql);
         $stmt->execute([$task_id]);
-        $isC = $stmt->fetch();
+        $isC = $stmt->fetch()['is_completed'];
 
-        $sql = "SELECT (ans1 + ans2 + ans3 + ans4)/4 FROM group_surveys WHERE group_task_id = ?";
+        $sql = "SELECT (ans1 + ans2 + ans3 + ans4)/4 AS avgans FROM group_surveys WHERE group_task_id = ?";
         $stmt = $connection->prepare($sql);
         $stmt->execute([$task_id]);
-        $avg = $stmt->fetch();
+        $avg = $stmt->fetch()['avgans'];
 
         $sql = "UPDATE group_tasks SET estimated_load = ? WHERE group_task_id = ?";
         $stmt = $connection->prepare($sql);
         $stmt->execute([$avg,$task_id]);
 
         $location = "../../index.php?page=group&id=".$_GET['group'];
-        if($isC == 0) $location = "../../actions/toggle_complete?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD;
+        if($isC == 0) $location = "../../actions/tasks/toggle_completed.php?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD;
         header("Location: $location");
         die;
     }
@@ -96,19 +96,19 @@
         $sql = "SELECT is_completed FROM tasks WHERE task_id = ?";
         $stmt = $connection->prepare($sql);
         $stmt->execute([$task_id]);
-        $isC = $stmt->fetch();
+        $isC = $stmt->fetch()['is_completed'];
 
-        $sql = "SELECT (ans1 + ans2 + ans3 + ans4)/4 FROM surveys WHERE task_id = ?";
+        $sql = "SELECT (ans1 + ans2 + ans3 + ans4)/4 AS avgans FROM surveys WHERE task_id = ?";
         $stmt = $connection->prepare($sql);
         $stmt->execute([$task_id]);
-        $avg = $stmt->fetch();
+        $avg = $stmt->fetch()['avgans'];
 
         $sql = "UPDATE tasks SET estimated_load = ? WHERE task_id = ?";
         $stmt = $connection->prepare($sql);
         $stmt->execute([$avg,$task_id]);
 
         $location = "../../index.php?page=group&id=manage_personal";
-        if($isC == 0) $location = "../../actions/toggle_complete.php?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD;
+        if($isC == 0) $location = "../../actions/tasks/toggle_completed.php?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD;
         header("Location: $location");
         die;
     }
