@@ -21,7 +21,7 @@
         $stmt->execute([$task_id]);
         $var1 = $stmt->fetchAll();
         if(count($var1) != 0) {
-            header("Location: ../../index.php?page=group&id=home");
+            header("Location: ../../index.php?page=home");
             die;
         }
         //Check that the task belongs to the current user
@@ -30,7 +30,7 @@
         $stmt->execute([$task_id, Auth::user()["user_id"]]);
         $var1 = $stmt->fetchAll();
         if(count($var1) == 0){
-            header("Location: ../../index.php?page=group&id=home");
+            header("Location: ../../index.php?page=home");
             die;
         }
     
@@ -44,7 +44,23 @@
         $stmt->bindParam(':ans4', $_POST['q4']);
         $stmt->execute();
 
-        header("Location: ../../actions/toggle_complete?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD);
+        $sql = "SELECT is_completed FROM group_tasks WHERE group_task_id = ?";
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([$task_id]);
+        $isC = $stmt->fetch();
+
+        $sql = "SELECT (ans1 + ans2 + ans3 + ans4)/4 FROM group_surveys WHERE group_task_id = ?";
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([$task_id]);
+        $avg = $stmt->fetch();
+
+        $sql = "UPDATE group_tasks SET estimated_load = ? WHERE group_task_id = ?";
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([$avg,$task_id]);
+
+        $location = "../../index.php?page=group&id=".$_GET['group'];
+        if($isC == 0) $location = "../../actions/toggle_complete?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD;
+        header("Location: $location");
         die;
     }
     else{
@@ -77,7 +93,23 @@
         $stmt->bindParam(':ans4', $_POST['q4']);
         $stmt->execute();
 
-        header("Location: ../../actions/tasks/toggle_completed.php?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD);
+        $sql = "SELECT is_completed FROM tasks WHERE task_id = ?";
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([$task_id]);
+        $isC = $stmt->fetch();
+
+        $sql = "SELECT (ans1 + ans2 + ans3 + ans4)/4 FROM surveys WHERE task_id = ?";
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([$task_id]);
+        $avg = $stmt->fetch();
+
+        $sql = "UPDATE tasks SET estimated_load = ? WHERE task_id = ?";
+        $stmt = $connection->prepare($sql);
+        $stmt->execute([$avg,$task_id]);
+
+        $location = "../../index.php?page=group&id=manage_personal";
+        if($isC == 0) $location = "../../actions/toggle_complete.php?group_id=" .$_GET['group']. "&task_id=" .$task_id ."&onD=".$onD;
+        header("Location: $location");
         die;
     }
 
