@@ -75,6 +75,7 @@ if (!$group) {
                                 <th data-dt-order="disable"><!-- Edit --></th>
                                 <?php if ($is_current_user): ?>
                                 <th data-dt-order="disable"><!-- Transfer --></th>
+                                <th data-dt-order="disable"><!-- Transfer --></th>
                                 <?php endif; ?>
                                 <th data-dt-order="disable"><!-- Delete --></th>
                             </tr>
@@ -113,6 +114,15 @@ if (!$group) {
                                         <i class="fa fa-share"></i>
                                     </a>
                                 </td>
+                                <?php
+                                       
+                                    if($task['is_completed'] && !UserUtils::does_survey_exist($task['group_task_id'], true)){
+                                        echo "<td><a class='btn btn-sm btn-outline-primary' href='index.php?page=survey&task_id=".$task['group_task_id']."&group=".$group_id."'><i class='fa fa-check-square-o'></i></a></td>";
+                                    }
+                                    else{
+                                        echo "<td></td>";
+                                    }
+                                ?>
                                 <?php endif; ?>
                                 <td>
                                     <a class="btn btn-sm btn-outline-danger" 

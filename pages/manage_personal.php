@@ -11,8 +11,9 @@
                 <th style="width: 10%">Done?</th>
                 <th style="width: 50%">Task</th>
                 <th style="width: 20%">Due</th>
-                <th data-dt-order="disable" style="width: 10%"><!-- Edit --></th>
-                <th data-dt-order="disable" style="width: 10%"><!-- Delete --></th>
+                <th data-dt-order="disable" style="width: 6.6%"><!-- Edit --></th>
+                <th data-dt-order="disable" style="width: 6.6%"><!-- Transfer --></th>
+                <th data-dt-order="disable" style="width: 6.6%"><!-- Delete --></th>
             </tr>
         </thead>
         <tbody>
@@ -29,6 +30,13 @@
                 echo "<td>" . $task['title'] . "</td>";
                 echo "<td>". (new DateTimeImmutable($task['due_date']))->format("d/m/Y, H:i") ."</td>";
                 echo "<td>". "<a class='btn btn-sm btn-outline-primary' href='index.php?page=edit_task&task_id=" . $task['task_id'] . "'><i class='fa fa-edit'></i></a></td>";
+                if($task['is_completed'] && !UserUtils::does_survey_exist($task['task_id'], false)){
+                    echo "<td><a class='btn btn-sm btn-outline-primary' href='index.php?page=survey&task_id=".$task['group_task_id']."&group=".$group_id."'><i class='fa fa-check-square-o'></i></a></td>";
+                }
+                else{
+                    echo "<td></td>";
+                }
+                                
                 echo "<td><a class='btn btn-sm btn-outline-danger' href='./actions/tasks/delete.php?task_id=" . $task['task_id'] . "'><i class='fa fa-trash'/></a></td>";    
                 echo "</tr>";
             }
