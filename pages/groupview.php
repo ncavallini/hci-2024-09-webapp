@@ -24,22 +24,19 @@ try {
     // Fetch tasks for the specified group_id
     $sql = "
         SELECT 
-            at.task_id, 
             at.title, 
             at.location, 
             at.description, 
             at.due_date, 
             at.estimated_load, 
-            t.is_completed 
+            at.is_completed 
         FROM 
-            all_tasks at
-        LEFT JOIN 
-            tasks t ON at.task_id = t.task_id
+            group_tasks at
         WHERE 
             at.group_id = ? AND at.user_id = ?
-            AND (t.is_completed = 0 OR t.is_completed IS NULL)
+            AND (at.is_completed = 0 OR at.is_completed IS NULL)
         ORDER BY 
-            t.is_completed ASC, at.due_date ASC";
+            at.is_completed ASC, at.due_date ASC";
     $stmt = $dbconnection->prepare($sql);
     $stmt->execute([$group_id, $user_id]);
     $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -430,7 +427,7 @@ $sql = "
     JOIN 
         users u ON gt.user_id = u.user_id
     WHERE 
-        gt.group_id = ?
+        gt.group_id = ? AND gt.is_completed = 0
     GROUP BY 
         gt.user_id
     ORDER BY 
