@@ -79,9 +79,7 @@ try {
 
 
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
    
     <div class="container mt-5">
         <h1 class="mb-4"><?php echo htmlspecialchars($group); ?>'s Tasks</h1>
@@ -97,7 +95,7 @@ try {
             </a>
         </h5>
         <div class="progress mt-3">
-            <div 
+            <div  
                 class="progress-bar" 
                 id="loadProgressBar" 
                 role="progressbar" 
@@ -181,18 +179,8 @@ try {
         </div>
     </div>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Group Mental Load Comparison</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <!-- Include jQuery and Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <!-- Bootstrap JS Bundle includes Popper.js -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
 
     <script>
