@@ -95,7 +95,7 @@ try {
             </a>
         </h5>
         <div class="progress mt-3">
-            <div 
+            <div  
                 class="progress-bar" 
                 id="loadProgressBar" 
                 role="progressbar" 
