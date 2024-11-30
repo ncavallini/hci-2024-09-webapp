@@ -48,12 +48,12 @@ if (!$group) {
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#<?php echo $accordion_id; ?>">
                 <?php echo UserUtils::get_avatar($member['first_name'][0] . $member['last_name'][0]); ?> &nbsp;&nbsp;
                 &nbsp;&nbsp;<?php echo ($member['first_name'] . " " . $member['last_name']); ?>
-                <div class="inline-progress">
+                <!--<div class="inline-progress">
                     &nbsp; &nbsp;
         <div class="progress" style="width: 200px;">
-            <div class="progress-bar" role="progressbar" style="width: <?php echo UserUtils::get_total_load($member['username'])*100/UserUtils::get_max_load() ?>%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar" role="progressbar" style="width: <?php //echo UserUtils::get_total_load($member['username'])*100/UserUtils::get_max_load() ?>%;" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-    </div>
+    </div>-->
 
             </button>
         </h3>
@@ -75,7 +75,7 @@ if (!$group) {
                                 <th data-dt-order="disable"><!-- Edit --></th>
                                 <?php if ($is_current_user): ?>
                                 <th data-dt-order="disable"><!-- Transfer --></th>
-                                <th data-dt-order="disable"><!-- Transfer --></th>
+                                <th data-dt-order="disable"><!-- Survey --></th>
                                 <?php endif; ?>
                                 <th data-dt-order="disable"><!-- Delete --></th>
                             </tr>
@@ -168,10 +168,12 @@ if (!$group) {
 
     setAccordionStatusLink.addEventListener("click", () => {
         accordions.forEach(accordion => {
-            accordion.classList.toggle("show");
-            const id = accordion.id;
-            const button = document.querySelector(`button[data-bs-target="#${id}"]`);
-            button.classList.toggle("collapsed");
+            if(allOpen == accordion.classList.contains("show")){
+                const id = accordion.id;
+                const button = document.querySelector(`button[data-bs-target="#${id}"]`);
+                button.classList.toggle("collapsed");
+                accordion.classList.toggle("show");
+            }
         });
 
         allOpen = !allOpen;
