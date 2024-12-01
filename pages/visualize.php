@@ -119,8 +119,8 @@ try {
         <!-- Left-aligned Task/Group Buttons -->
         <div class="d-flex flex-wrap gap-2">
             <button id="taskListButton" class="btn btn-primary" onclick="showListView('tasks')">Tasks</button>
-            <a class="nav-link" href="index.php?page=groupViewing"><button id="groupListButton" class="btn btn-secondary" onclick="showListView('groups')">Groups</button></a>    
-        </div>
+            <button id="groupListButton" class="btn btn-secondary" onclick="window.location.href='index.php?page=groupViewing'">Groups</button>
+            </div>
 
         <!-- Right-aligned List/Pie Chart View Buttons -->
         <div class="d-flex flex-wrap gap-2">

@@ -164,8 +164,8 @@ try {
     <div class="d-flex justify-content-between mb-3 gap-2">
         <!-- Left-aligned Task/Group Buttons -->
         <div class="d-flex flex-wrap gap-2">
-            <a class="nav-link" href="index.php?page=visualize"><button id="taskListButton" class="btn btn-secondary" onclick="showListView('tasks')">Tasks</button></a>
-            <button id="groupListButton" class="btn btn-primary" onclick="showListView('groups')">Groups</button>
+        <button id="taskListButton" class="btn btn-secondary" onclick="window.location.href='index.php?page=visualize'">Tasks</button>
+        <button id="groupListButton" class="btn btn-primary" onclick="showListView('groups')">Groups</button>
         </div>
 
         <!-- Right-aligned List/Pie Chart View Buttons -->
