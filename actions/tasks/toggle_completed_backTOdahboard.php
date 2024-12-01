@@ -37,7 +37,6 @@ if ($group_id == 0) {
     $location = "../../index.php?page=survey&task_id={$task_id}&group={$group_id}";
 }
 
-// Execute the update query
 $stmt = $connection->prepare($sql);
 $stmt->execute([$task_id]);
 
@@ -74,9 +73,23 @@ else if($is_completed == 0) {
 }
 
 
-$sql = "UPDATE users SET coins = GREATEST(0, coins + (?)) WHERE user_id = ?";
-$stmt = $connection->prepare($sql);
-$stmt->execute([$coins_to_add, Auth::user()['user_id']]);
+if($group_id == 0) {
+    $sql = "UPDATE users SET coins = GREATEST(0, coins + (?)) WHERE user_id = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->execute([$coins_to_add, Auth::user()['user_id']]);
+}
+
+else {
+    $sql = "INSERT INTO group_coins VALUES(:group_id, :user_id, :coins_to_add) ON DUPLICATE KEY UPDATE coins = coins + (:coins_to_add)";
+    $stmt = $connection->prepare($sql);
+    $stmt->execute([
+        ":group_id" => $group_id,
+        ":user_id" => Auth::user()['user_id'],
+        ":coins_to_add" => $coins_to_add
+    ]);
+}
+
+
 
 if($onDashboard != 0) $location = "../../index.php?page=dashboard";
 header("Location: $location");
