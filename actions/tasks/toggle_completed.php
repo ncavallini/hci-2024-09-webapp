@@ -80,12 +80,12 @@ if($group_id == 0) {
 }
 
 else {
-    $sql = "INSERT INTO group_coins VALUES(:group_id, :user_id, :coins) ON DUPLICATE KEY UPDATE coins = :coins";
+    $sql = "INSERT INTO group_coins VALUES(:group_id, :user_id, :coins_to_add) ON DUPLICATE KEY UPDATE coins = coins + (:coins_to_add)";
     $stmt = $connection->prepare($sql);
     $stmt->execute([
         ":group_id" => $group_id,
         ":user_id" => Auth::user()['user_id'],
-        ":coins" => $coins_to_add
+        ":coins_to_add" => $coins_to_add
     ]);
 }
 

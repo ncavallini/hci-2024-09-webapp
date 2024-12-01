@@ -22,5 +22,5 @@ $stmt = $connection->prepare($sql);
 $stmt->execute([$_GET['task_id']]);
 $stmt = $connection->prepare($sql2);
 $stmt->execute([$_GET['task_id']]);
-header("Location: $location");
+//header("Location: $location");
 ?>
