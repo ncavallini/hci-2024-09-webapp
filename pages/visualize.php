@@ -132,19 +132,21 @@ try {
 
 
     <!-- List View -->
-    <div id="listView" class="d-flex flex-column gap-3 overflow-auto" style="max-height: 80vh;">
+    <div id="listView" class="listView" class="d-flex flex-column gap-3 overflow-auto" style="max-height: 80vh;">
     <h3>Personal Tasks</h3>
     <div id="personalTasks">
         <?php if (!empty($personalTasks)): ?>
             <?php foreach ($personalTasks as $task): ?>
-                <div class="task-item p-3 border rounded"
+                <div class="task-item d-flex justify-content-between align-items-center p-3 border rounded flex-wrap"
                     style="word-wrap: break-word; overflow-wrap: anywhere; cursor: pointer;"
                     onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
                     <div class="task-info">
                         <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
                         <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
-                        <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
                     </div>
+                        <div>
+                            <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
+                        </div>
                 </div>
             <?php endforeach; ?>
         <?php else: ?>
@@ -163,7 +165,9 @@ try {
                         <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
                         <p class="mb-1 text-muted">Group: <?php echo htmlspecialchars($task['group_name']); ?></p>
                         <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
-                        <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -182,7 +186,9 @@ try {
                     <div class="task-info">
                         <h5 class="mb-2"><?php echo htmlspecialchars($task['title']); ?></h5>
                         <p class="mb-1 text-muted">Due: <?php echo (new DateTimeImmutable($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
-                        <p class="mb-0 text-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></span>
                     </div>
                 </div>
             <?php endforeach; ?>

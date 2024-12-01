@@ -451,12 +451,16 @@ try {
             const groupDiv = document.createElement("div");
             groupDiv.className = "group-item border rounded p-3 mb-3";
             groupDiv.innerHTML = `
-                <h5 class="justify-content-between">
-                    ${groupName}
-                    <button class="btn btn-primary btn-sm view-group-button">View Group</button>
-                </h5>
-                <p>${groupData.tasks.length} tasks in this group</p>
-                <p class="mb-2 text-muted">Load: ${groupData.total_load}</p>
+                <div class"flex-grow-1 me-3">
+                    <h5 class="justify-content-between">
+                        ${groupName}
+                        <button class="btn btn-primary btn-sm view-group-button">View Group</button>
+                    </h5>
+                    <p>${groupData.tasks.length} tasks</p>
+                </div>
+                <div>
+                    <span class="badge bg-primary">Load: ${groupData.total_load}</span>
+                </div>
             `;
 
             // Add click event listener for the button

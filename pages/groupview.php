@@ -122,8 +122,10 @@ try {
     <?php if (!empty($nonOverdueTasks)): ?>
         <?php foreach ($nonOverdueTasks as $task): ?>
             <div class="task-item p-3 border rounded" onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
-                <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
-                <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                <div class="flex-grow-1 me-3">
+                    <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
+                    <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                </div>
                 <p class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
             </div>
         <?php endforeach; ?>
@@ -135,8 +137,10 @@ try {
     <?php if (!empty($overdueTasks)): ?>
         <?php foreach ($overdueTasks as $task): ?>
             <div class="task-item p-3 border rounded" style="background-color: lightcoral;" onclick="showTaskDetails(<?php echo htmlspecialchars(json_encode($task), ENT_QUOTES); ?>)">
-                <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
-                <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                <div class="flex-grow-1 me-3">
+                    <h5 class="mb-1"><?php echo htmlspecialchars($task['title']); ?></h5>
+                    <p class="mb-1 text-muted">Due: <?php echo (new DateTime($task['due_date']))->format('Y-m-d H:i:s'); ?></p>
+                </div>
                 <p class="badge bg-primary">Load: <?php echo htmlspecialchars($task['estimated_load']); ?></p>
             </div>
         <?php endforeach; ?>
