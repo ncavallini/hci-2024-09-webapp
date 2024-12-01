@@ -19,8 +19,9 @@ else {
     $location = "../../index.php?page=manage_personal";
 }
 $stmt = $connection->prepare($sql);
-$stmt->execute([$_GET['task_id']]);
+$res = $stmt->execute([$_GET['task_id']]);
 $stmt = $connection->prepare($sql2);
 $stmt->execute([$_GET['task_id']]);
-//header("Location: $location");
+//var_dump($res)
+header("Location: $location");
 ?>
