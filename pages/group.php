@@ -5,6 +5,7 @@ if (!isset($_GET['id'])) {
 }
 
 $group_id = $_GET['id'];
+$user_id = Auth::user()['user_id'];
 
 // Fetch group details
 $sql = "SELECT g.* FROM groups g WHERE group_id = ?";
@@ -22,7 +23,7 @@ if (!$group) {
 <br>
 
 <h2>Group Coins</h2>
-<p class="lead"> <i class="fa fa-coins"></i> The group earned <strong><?php echo GroupUtils::get_group_coins($group_id); ?> coins.</strong></p>
+<p class="lead"> <i class="fa fa-coins"></i> You have <strong><?php echo GroupUtils::get_group_coins_per_user($group_id, $user_id); ?> coins in this group.</strong></p>
 
 <h2>Members & Tasks</h2>
 <a class="no-loading link-offset-2 link-offset-3-hover link-underline link-underline-opacity-0 link-underline-opacity-75-hover" id="set-accordion-status-link"></a>
