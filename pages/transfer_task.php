@@ -7,6 +7,7 @@
 
         $task_id = $_GET['task_id'];
         $group_id = $_GET['group_id'];
+        $user_id = Auth::user()['user_id'];
         $sql = "SELECT * FROM group_tasks WHERE group_task_id = ? AND group_id = ?";
         $stmt = $dbconnection->prepare($sql);
         $stmt->execute([$task_id, $group_id]);
@@ -17,7 +18,7 @@
             goto end;
         }
 
-        $user_coins = UserUtils::get_coins();
+        $user_coins = GroupUtils::get_group_coins_per_user($group_id, $user_id);
         if($task['estimated_load'] > $user_coins) {
             echo "<div class='alert alert-warning'>You do not have enough coins to transfer this task</div>";
             goto end;
