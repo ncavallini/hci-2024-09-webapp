@@ -44,11 +44,18 @@ class UserUtils {
     }
 
     public static function get_coins() : int {
+        $coins = 0;
         $dbconnection = DBConnection::get_connection();
         $sql = "SELECT coins FROM users WHERE user_id = ?";
         $stmt = $dbconnection->prepare($sql);
         $stmt->execute([Auth::user()['user_id']]);
-        return $stmt->fetchColumn();
+        $coins += $stmt->fetchColumn(0);
+
+        $sql = "SELECT SUM(coins) FROM group_coins WHERE user_id = ?";
+        $stmt = $dbconnection->prepare($sql);
+        $stmt->execute([Auth::user()['user_id']]);
+        $coins += $stmt->fetchColumn(0) ?? 0;
+        return $coins;
     }
 
     public static function does_survey_exist(int $task_id, bool $isgroup): bool {
