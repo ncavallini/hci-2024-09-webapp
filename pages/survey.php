@@ -17,7 +17,14 @@
     <label for="q4">How would you rate your performance? <span id="q4_span">(5/10)</span></label>
     <input type="range" name="q4" id="q4" min="0" max="10" step="1" class="form-range">
     <br>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <div class="row">
+    <div class="d-flex justify-content-between w-100">
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a href="index.php?page=dashboard" class="btn btn-secondary">Skip</a>
+    </div>
+</div>
+
+
 </form>
 <script>
     const range1 = document.getElementById("q1");
